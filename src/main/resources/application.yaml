@@ -7,8 +7,18 @@ spring:
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
-
+  web:
+    resources:
+      static-locations: file:uploads/
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+file:
+  upload-path: D:/SpringCode/demo/uploads/
+  access-url: http://localhost:8080/files/

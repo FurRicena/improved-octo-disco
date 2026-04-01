@@ -27,6 +27,10 @@ public class GlobalExceptionHandler {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Result.error(401, e.getMessage()));
         }
+        if ("文件不能为空".equals(e.getMessage())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Result.error(401, e.getMessage()));
+        }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Result.error(500, e.getMessage()));
     }

@@ -13,4 +13,11 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+
+        registry.addResourceHandler("/files/**")
+                .addResourceLocations("file:D:/SpringCode/demo/uploads/");
+    }
 }
