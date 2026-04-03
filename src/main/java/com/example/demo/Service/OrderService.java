@@ -1,7 +1,7 @@
 package com.example.demo.Service;
 
 import com.example.demo.DTO.Request.OrderRequest;
-import com.example.demo.DTO.Responce.OrderResponce;
+import com.example.demo.DTO.Responce.OrderResponse;
 import com.example.demo.Entity.Menu;
 import com.example.demo.Entity.Orders;
 import com.example.demo.Entity.OrderItem;
@@ -77,25 +77,25 @@ public class OrderService {
     }
 
     @Schema(description = "查询订单详情")
-    public OrderResponce getOrderDetail(Long orderId){
+    public OrderResponse getOrderDetail(Long orderId){
         Orders orders = ordersRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("订单不存在"));
 
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
-        OrderResponce orderResponce = new OrderResponce();
+        OrderResponse orderResponce = new OrderResponse();
         orderResponce.setId(orders.getId());
         orderResponce.setUserId(orders.getUserId());
         orderResponce.setTotalPrice(orders.getTotalPrice());
         orderResponce.setStatus(String.valueOf(orders.getStatus()));
         orderResponce.setCreateTime(orders.getCreateTime());
 
-        List<OrderResponce.Item> itemVOList = new ArrayList<>();
+        List<OrderResponse.Item> itemVOList = new ArrayList<>();
 
         for(OrderItem item : items){
             Menu menu = menuRepository.findById(item.getMenuId())
                     .orElseThrow(() -> new RuntimeException("菜品不存在"));
 
-            OrderResponce.Item itemVO = new OrderResponce.Item();
+            OrderResponse.Item itemVO = new OrderResponse.Item();
             itemVO.setMenuId(menu.getId());
             itemVO.setName(menu.getName());
             itemVO.setQuantity(item.getQuantity());

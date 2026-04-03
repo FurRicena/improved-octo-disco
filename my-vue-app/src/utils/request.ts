@@ -11,7 +11,7 @@ const request = axios.create({
 request.interceptors.response.use(
     (res: AxiosResponse) => {
         if(res.data.code !== 200){
-            ElMessage.error(res.data.message || "请求失败")
+            ElMessage.error(res.data.msg || "请求失败")
             return Promise.reject(new Error(res.data.message))
         }
         return res.data

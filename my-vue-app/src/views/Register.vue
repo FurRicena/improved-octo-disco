@@ -2,7 +2,7 @@
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { register } from '@/api/user'
-import type { RegisterForm } from '@/types/user'
+import type { RegisterForm } from '@/types/User.ts'
 import type { FormInstance, FormRules } from 'element-plus'
 import { useRouter } from "vue-router";
 
@@ -15,7 +15,8 @@ const formRef = ref<FormInstance>()
 // 表单数据
 const form = reactive<RegisterForm>({
   username: '',
-  password: ''
+  password: '',
+  role: 'USER'
 })
 
 // 校验规则

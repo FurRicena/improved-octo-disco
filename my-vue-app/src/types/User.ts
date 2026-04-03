@@ -1,3 +1,12 @@
+// 用户类型
+export interface User{
+    id?: number
+    username: string
+    password?: string   // 列表中不展示，编辑时可修改
+    role: string        // 'ADMIN' 或 'USER'
+    createTime?: string
+}
+
 // 登录
 export interface LoginForm {
     username: string
@@ -13,6 +22,7 @@ export interface LoginResponse {
 export interface RegisterForm {
     username: string
     password: string
+    role: string
 }
 
 export interface RegisterResponse {

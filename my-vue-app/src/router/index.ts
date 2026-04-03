@@ -4,6 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from '@/views/Login.vue'
 import Register from '@/views/Register.vue'
 import Menu from "@/views/Menu.vue"
+import UserManage from "@/views/UserManage.vue";
 
 const routes = [
     {
@@ -21,6 +22,10 @@ const routes = [
     {
         path: '/menu',
         component: Menu
+    },
+    {
+        path: '/userManage',
+        component: UserManage
     }
 ]
 

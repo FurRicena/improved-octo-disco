@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import { login } from '@/api/user'
-import type { LoginForm } from '@/types/user'
+import type { LoginForm } from '@/types/User.ts'
 import { useRouter } from 'vue-router'
 import {ElMessage} from "element-plus";
 

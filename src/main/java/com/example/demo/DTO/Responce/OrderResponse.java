@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class OrderResponce {
+public class OrderResponse {
     private Long id;
     private Long userId;
     private BigDecimal totalPrice;

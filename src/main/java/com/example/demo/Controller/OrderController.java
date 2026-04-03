@@ -2,7 +2,7 @@ package com.example.demo.Controller;
 
 import com.example.demo.Common.Result;
 import com.example.demo.DTO.Request.OrderRequest;
-import com.example.demo.DTO.Responce.OrderResponce;
+import com.example.demo.DTO.Responce.OrderResponse;
 import com.example.demo.Entity.Orders;
 import com.example.demo.Enums.OrderStatus;
 import com.example.demo.Service.OrderService;
@@ -37,7 +37,7 @@ public class OrderController {
 
     @Operation(summary = "查询订单详情")
     @GetMapping("/{id}")
-    public Result<OrderResponce> getOrderDetail(@PathVariable Long id){
+    public Result<OrderResponse> getOrderDetail(@PathVariable Long id){
         return Result.success(orderService.getOrderDetail(id));
     }
 
