@@ -44,7 +44,7 @@ const handleRegister = async () => {
 
       console.log(res)
       // 👇 核心：跳转到登录页
-      router.push('/login')
+      await router.push('/login')
 
       // 可以跳转到登录页（后面教你router）
     } catch (err) {

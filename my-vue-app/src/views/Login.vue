@@ -3,6 +3,7 @@ import { reactive } from 'vue'
 import { login } from '@/api/user'
 import type { LoginForm } from '@/types/user'
 import { useRouter } from 'vue-router'
+import {ElMessage} from "element-plus";
 
 // 路由
 const router = useRouter()
@@ -15,7 +16,9 @@ const form = reactive<LoginForm>({
 
 const handleLogin = async () => {
   const res = await login(form)
-  console.log(res.data.token) // TS自动提示
+  ElMessage("登录成功")
+  await router.push('/menu')
+  console.log(res) // TS自动提示
 }
 </script>
 
@@ -42,7 +45,7 @@ const handleLogin = async () => {
             登录
           </el-button>
 
-          <el-button type="text" @click="router.push('/register')">
+          <el-button link @click="router.push('/register')">
             没有账号？去注册
           </el-button>
         </el-form-item>
