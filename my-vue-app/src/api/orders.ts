@@ -1,5 +1,5 @@
 import request from "@/utils/request.ts"
-import type { Orders} from "@/types/Orders.ts"
+import type {CreateOrderRequest, Orders} from "@/types/Orders.ts"
 
 // 查询所有订单
 export function getOrdersList() {
@@ -10,7 +10,7 @@ export function getOrdersList() {
 }
 
 // 创建订单
-export function createOrders(data: Orders) {
+export function createOrder(data: CreateOrderRequest) {
     return request<Orders>({
         url: '/order',
         method: 'post',

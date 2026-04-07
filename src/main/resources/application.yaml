@@ -19,6 +19,10 @@ spring:
       ddl-auto: update
     show-sql: true
 
+jwt:
+  secret: "3Y8i4XpS2a/Z+H9B4E3OaN1g1RkYj/mJz+f9p7k+L8A="
+  expiration: 86400000
+
 file:
   upload-path: D:/SpringCode/demo/uploads/
   access-url: http://localhost:8080/files/

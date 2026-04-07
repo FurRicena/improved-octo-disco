@@ -1,6 +1,6 @@
 // 用户类型
 export interface User{
-    id?: number
+    id: number
     username: string
     password?: string   // 列表中不展示，编辑时可修改
     role: string        // 'ADMIN' 或 'USER'
@@ -15,7 +15,10 @@ export interface LoginForm {
 
 export interface LoginResponse {
     token: string
-    userId: number
+    type: string
+    id: number
+    username: string
+    role: string
 }
 
 // 注册

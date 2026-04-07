@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
-import { login } from '@/api/user'
+// import { login } from '@/api/user'
 import type { LoginForm } from '@/types/User.ts'
 import { useRouter } from 'vue-router'
 import {ElMessage} from "element-plus";
+import { useUserStore} from "@/stores/user.ts"
 
 // 路由
 const router = useRouter()
+const userStore = useUserStore()
 
 // TS写法（类型约束）
 const form = reactive<LoginForm>({
@@ -15,10 +17,9 @@ const form = reactive<LoginForm>({
 })
 
 const handleLogin = async () => {
-  const res = await login(form)
-  ElMessage("登录成功")
+  await userStore.login(form)
+  ElMessage.success("登录成功")
   await router.push('/menu')
-  console.log(res) // TS自动提示
 }
 </script>
 

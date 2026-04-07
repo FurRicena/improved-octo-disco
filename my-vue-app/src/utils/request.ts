@@ -22,4 +22,16 @@ request.interceptors.response.use(
     }
 )
 
+// 请求拦截器：自动添加 Authorization 请求头
+request.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token')
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`
+        }
+        return config
+    },
+    (error) => Promise.reject(error)
+)
+
 export default request

@@ -1,10 +1,17 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Common.Result;
+import com.example.demo.DTO.Responce.JwtResponse;
 import com.example.demo.Entity.User;
+import com.example.demo.Security.UserDetailsImpl;
 import com.example.demo.Service.UserService;
+import com.example.demo.Utils.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 // import java.util.List;
@@ -15,10 +22,15 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
 
-    public UserController(UserService userService){
+    public UserController(UserService userService, AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
         this.userService = userService;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtils = jwtUtils;
     }
+
 
     @Operation(summary = "用户注册")
     @PostMapping("/register")
@@ -30,8 +42,28 @@ public class UserController {
     @PostMapping("/login")
     public Result<?> login(@RequestBody User user){
         //return Result.success(userService.login(user.getUsername(),user.getPassword()));
-        User u = userService.login(user.getUsername(), user.getPassword());
-        return Result.success(u);
+//        User u = userService.login(user.getUsername(), user.getPassword());
+//        return Result.success(u);
+
+        // 1. 用 AuthenticationManager 验证用户名密码
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        user.getUsername(),
+                        user.getPassword()));
+
+        // 2. 验证通过，生成 JWT Token
+        String jwt = jwtUtils.generateJwtToken(authentication);
+
+        // 3. 获取用户详情
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        // 4. 返回 Token 和用户信息给前端（密码不要返回！）
+        return Result.success(new JwtResponse(
+                jwt,
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getRole().name()
+        ));
     }
 
     @Operation(summary = "查询所有用户")
