@@ -93,7 +93,7 @@
               <span>{{ formatDate(order.createTime) }}</span>
             </div>
             <el-table :data="order.items" border size="small">
-              <el-table-column prop="menuName" label="菜品" />
+              <el-table-column prop="name" label="菜品" />
               <el-table-column prop="quantity" label="数量" width="80" />
               <el-table-column prop="price" label="单价" width="100">
                 <template #default="{ row }">¥{{ row.price?.toFixed(2) }}</template>
@@ -114,7 +114,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 // import { Plus } from '@element-plus/icons-vue'
 import {getUserList, updateUser, deleteUser, register} from '@/api/user'  // 假设的API
-import { getUserOrders} from "@/api/orders.ts";
+import {getOrderDetail, getUserOrders} from "@/api/orders.ts";
 import type { User } from "@/types/User.ts";
 import type { Orders } from "@/types/Orders.ts";
 
@@ -245,8 +245,25 @@ const activeOrderTab = ref('all')
 const viewOrders = async (user : User) => {
   try {
     if (user.id) {
-      const res = await getUserOrders(user.id)  // 返回订单列表，每个订单包含items
-      userOrders.value = res.data
+      // 1. 获取订单列表（无 items）
+      const res = await getUserOrders(user.id)
+      const orders = res.data  // Orders[]
+
+      // 2. 为每个订单请求详情（获取 items）
+      const detailRequests = orders.map(order =>
+          getOrderDetail(order.id)
+              .then(detailRes => {
+                // 合并 items，保留原订单其他字段
+                return { ...order, items: detailRes.data.items || [] }
+              })
+              .catch(err => {
+                console.error(`加载订单 ${order.id} 详情失败`, err)
+                return { ...order, items: [] }  // 失败时给空数组，避免表格空白
+              })
+      )
+
+      // 3. 等待所有详情加载完成,然后赋值并打开对话框
+      userOrders.value = await Promise.all(detailRequests)
       orderDialogVisible.value = true
     }
   } catch (error) {

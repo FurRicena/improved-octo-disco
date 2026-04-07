@@ -82,12 +82,12 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("订单不存在"));
 
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
-        OrderResponse orderResponce = new OrderResponse();
-        orderResponce.setId(orders.getId());
-        orderResponce.setUserId(orders.getUserId());
-        orderResponce.setTotalPrice(orders.getTotalPrice());
-        orderResponce.setStatus(String.valueOf(orders.getStatus()));
-        orderResponce.setCreateTime(orders.getCreateTime());
+        OrderResponse orderResponse = new OrderResponse();
+        orderResponse.setId(orders.getId());
+        orderResponse.setUserId(orders.getUserId());
+        orderResponse.setTotalPrice(orders.getTotalPrice());
+        orderResponse.setStatus(String.valueOf(orders.getStatus()));
+        orderResponse.setCreateTime(orders.getCreateTime());
 
         List<OrderResponse.Item> itemVOList = new ArrayList<>();
 
@@ -104,8 +104,8 @@ public class OrderService {
             itemVOList.add(itemVO);
         }
 
-        orderResponce.setItems(itemVOList);
-        return orderResponce;
+        orderResponse.setItems(itemVOList);
+        return orderResponse;
     }
 
     @Schema(description = "更新订单状态")
