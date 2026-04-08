@@ -222,7 +222,16 @@ const submitOrder = async () => {
     ElMessage.success('订单创建成功！')
     cart.clearCart()  // 清空购物车
     // 可选：跳转到订单详情页或我的订单页
-    await router.push(`/my-orders?orderId=${newOrder.data.id}`)
+    // await router.push(`/my-orders?orderId=${newOrder.data.id}`)
+    await router.push({
+      path: '/orderSuccess',
+      query: {
+        orderId: newOrder.data.id,
+        totalPrice: newOrder.data.totalPrice,
+        orderTime: newOrder.data.createTime,
+        status: newOrder.data.status
+      }
+    })
   } catch (error: any) {
     ElMessage.error(error.message || '下单失败，请重试')
   } finally {

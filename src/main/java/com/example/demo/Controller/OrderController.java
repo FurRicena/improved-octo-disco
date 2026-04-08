@@ -8,6 +8,7 @@ import com.example.demo.Enums.OrderStatus;
 import com.example.demo.Service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,10 +30,24 @@ public class OrderController {
         return Result.success(orderService.createOrder(request));
     }
 
+    // 不分页
     @Operation(summary = "查询用户订单列表")
     @GetMapping("/user/{userId}")
     public Result<List<Orders>> getUserOrders(@PathVariable Long userId){
         return Result.success(orderService.getOrdersByUserId(userId));
+    }
+
+    // 新增：分页查询接口
+    @Operation(summary = "分页查询用户订单列表")
+    @GetMapping("/user/{userId}/page")
+    public Result<Page<Orders>> getUserOrdersByPage(
+            @PathVariable Long userId,
+            @RequestParam(required = false, defaultValue = "1") Integer pageNum,
+            @RequestParam(required = false, defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String status) {
+
+        Page<Orders> page = orderService.getUserOrdersByPage(userId, pageNum, pageSize, status);
+        return Result.success(page);
     }
 
     @Operation(summary = "查询订单详情")

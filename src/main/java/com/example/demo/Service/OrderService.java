@@ -10,6 +10,12 @@ import com.example.demo.Repository.MenuRepository;
 import com.example.demo.Repository.OrderItemRepository;
 import com.example.demo.Repository.OrdersRepository;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,11 +76,36 @@ public class OrderService {
 
         return orders;
     }
-
     @Schema(description = "查询用户订单")
-    public List<Orders> getOrdersByUserId(Long userId){
+        public List<Orders> getOrdersByUserId(Long userId){
         return ordersRepository.findByUserId(userId);
     }
+
+    @Schema(description = "查询用户订单(分页)")
+    public Page<Orders> getUserOrdersByPage(Long userId, Integer pageNum, Integer pageSize, String status) {
+        // 1. 参数默认值处理
+        int currentPage = (pageNum == null || pageNum < 1) ? 1 : pageNum;
+        int pageSizeVal = (pageSize == null || pageSize < 1) ? 10 : Math.min(pageSize, 100); // 限制最大100条
+        // 分页参数：PageRequest 的页码从0开始，所以需要 -1
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSizeVal, Sort.by(Sort.Direction.DESC, "createTime"));
+
+        // 2. 动态构建查询条件 (Specification)
+        Specification<Orders> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            // 必须条件：userId
+            predicates.add(cb.equal(root.get("userId"), userId));
+            // 可选条件：status
+            if (status != null && !status.trim().isEmpty()) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        // 3. 执行分页查询
+        return ordersRepository.findAll(spec, pageable);
+    }
+
+
 
     @Schema(description = "查询订单详情")
     public OrderResponse getOrderDetail(Long orderId){

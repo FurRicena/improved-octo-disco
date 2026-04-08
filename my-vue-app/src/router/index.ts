@@ -6,6 +6,9 @@ import Register from '@/views/Register.vue'
 import Menu from "@/views/Menu.vue"
 import UserManage from "@/views/UserManage.vue"
 import OrderMenu from "@/views/OrderMenu.vue"
+import OrderSuccess from "@/views/OrderSuccess.vue"
+import MyOrders from "@/views/MyOrders.vue"
+import OrderDetail from "@/views/OrderDetail.vue"
 
 const routes = [
     {
@@ -31,6 +34,18 @@ const routes = [
     {
         path: '/orderMenu',
         component: OrderMenu
+    },
+    {
+        path: '/orderSuccess',
+        component: OrderSuccess
+    },
+    {
+        path: '/myOrders',
+        component: MyOrders
+    },
+    {
+        path: '/orderDetail',
+        component: OrderDetail
     }
 ]
 
