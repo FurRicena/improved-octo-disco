@@ -28,7 +28,7 @@ export function getUserList() {
 }
 
 // 按id修改用户
-export function updateUser(id: number, data: User) {
+export function updateUser(id: number, data: Partial<User>) {
     return request<User>({
         url: `/user/${id}`,
         method: 'put',

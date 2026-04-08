@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 import type { Menu } from '@/types/Menu'
 
-// 获取菜单列表
+// 获取所有上架菜单列表
 export function getMenuList() {
     return request<Menu[]>({
         url: '/menu/available',

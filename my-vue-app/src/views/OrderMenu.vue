@@ -80,7 +80,7 @@
                   :min="1"
                   size="small"
                   controls-position="right"
-                  @change="(val) => cart.updateQuantity(item.menuId, val)"
+                  @change="(val: number) => cart.updateQuantity(item.menuId, val)"
               />
               <el-button link type="danger" size="small" @click="cart.removeItem(item.menuId)">
                 删除
@@ -129,7 +129,7 @@ import { useCartStore } from '@/stores/cart'
 import { useUserStore } from '@/stores/user'   // 需要你已有的用户store，或自己实现一个
 import { getMenuList } from '@/api/menu'        // 获取菜品API
 import { createOrder } from '@/api/orders'      // 创建订单API
-import { Menu } from "@/types/Menu.ts"
+import type { Menu } from "@/types/Menu.ts"
 
 // 使用stores
 const cart = useCartStore()
@@ -174,11 +174,21 @@ const openAddDialog = (item: Menu) => {
 }
 
 const confirmAdd = () => {
-  if (currentMenuItem.value) {
-    cart.addItem(currentMenuItem.value, addQuantity.value)
-    ElMessage.success(`已添加 ${currentMenuItem.value.name} x ${addQuantity.value}`)
+  if (currentMenuItem.value && currentMenuItem.value.id) {
+    cart.addItem(
+        {
+          id: currentMenuItem.value.id,
+          name: currentMenuItem.value.name,
+          price: currentMenuItem.value.price,
+          imageUrl: currentMenuItem.value.imageUrl,
+        },
+        addQuantity.value
+    );
+    ElMessage.success(`已添加 ${currentMenuItem.value.name} x ${addQuantity.value}`);
+    addDialogVisible.value = false;
+  } else {
+    ElMessage.error('菜品信息不完整，无法添加');
   }
-  addDialogVisible.value = false
 }
 
 // 提交订单
@@ -193,7 +203,7 @@ const submitOrder = async () => {
   const userId = userStore.userInfo?.id
   if (!userId) {
     ElMessage.error('用户未登录，请先登录')
-    router.push('/login')
+    await router.push('/login')
     return
   }
 
@@ -212,7 +222,7 @@ const submitOrder = async () => {
     ElMessage.success('订单创建成功！')
     cart.clearCart()  // 清空购物车
     // 可选：跳转到订单详情页或我的订单页
-    router.push(`/my-orders?orderId=${newOrder.id}`)
+    await router.push(`/my-orders?orderId=${newOrder.data.id}`)
   } catch (error: any) {
     ElMessage.error(error.message || '下单失败，请重试')
   } finally {
@@ -223,8 +233,8 @@ const submitOrder = async () => {
 // 获取菜品列表（只取上架的）
 const fetchMenu = async () => {
   try {
-    const data = await getMenuList({ status: 1 })
-    allMenu.value = data
+    const res = await getMenuList()
+    allMenu.value = res.data
   } catch (error) {
     ElMessage.error('获取菜单失败')
   }
