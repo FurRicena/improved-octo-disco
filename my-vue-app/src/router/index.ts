@@ -9,6 +9,7 @@ import OrderMenu from "@/views/OrderMenu.vue"
 import OrderSuccess from "@/views/OrderSuccess.vue"
 import MyOrders from "@/views/MyOrders.vue"
 import OrderDetail from "@/views/OrderDetail.vue"
+import AdminOrders from "@/views/AdminOrders.vue"
 
 const routes = [
     {
@@ -46,6 +47,10 @@ const routes = [
     {
         path: '/orderDetail',
         component: OrderDetail
+    },
+    {
+        path: '/adminOrders',
+        component: AdminOrders
     }
 ]
 

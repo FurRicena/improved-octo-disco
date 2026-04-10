@@ -16,7 +16,12 @@ public class Orders {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")   // 假设数据库列名为 user_id
+    private User user;
+
     @Schema(description = "用户id")
+    @Column(name = "user_id", insertable = false, updatable = false)
     private Long userId;
 
     @Schema(description = "总价")

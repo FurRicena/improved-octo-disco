@@ -5,11 +5,13 @@ import com.example.demo.DTO.Responce.OrderResponse;
 import com.example.demo.Entity.Menu;
 import com.example.demo.Entity.Orders;
 import com.example.demo.Entity.OrderItem;
+import com.example.demo.Entity.User;
 import com.example.demo.Enums.OrderStatus;
 import com.example.demo.Repository.MenuRepository;
 import com.example.demo.Repository.OrderItemRepository;
 import com.example.demo.Repository.OrdersRepository;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -117,7 +120,7 @@ public class OrderService {
         orderResponse.setId(orders.getId());
         orderResponse.setUserId(orders.getUserId());
         orderResponse.setTotalPrice(orders.getTotalPrice());
-        orderResponse.setStatus(String.valueOf(orders.getStatus()));
+        orderResponse.setStatus(orders.getStatus());
         orderResponse.setCreateTime(orders.getCreateTime());
 
         List<OrderResponse.Item> itemVOList = new ArrayList<>();
@@ -140,6 +143,7 @@ public class OrderService {
     }
 
     @Schema(description = "更新订单状态")
+    @Transactional
     public Orders updateOrderStatus(Long orderId, OrderStatus newStatus){
 
         Orders order = ordersRepository.findById(orderId)
@@ -164,5 +168,27 @@ public class OrderService {
     @Schema(description = "查询全部订单")
     public List<Orders> getAllOrders(){
         return ordersRepository.findAll();
+    }
+
+    @Schema(description = "查询全部订单(分页)")
+    public Page<Orders> getAdminOrdersPage(String username, OrderStatus status, Integer pageNum, Integer pageSize) {
+        int currentPage = (pageNum == null || pageNum < 1) ? 1 : pageNum;
+        int size = (pageSize == null || pageSize < 1) ? 10 : Math.min(pageSize, 100);
+        Pageable pageable = PageRequest.of(currentPage - 1, size, Sort.by(Sort.Direction.DESC, "createTime"));
+
+        Specification<Orders> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (StringUtils.hasText(username)) {
+                Join<Orders, User> userJoin = root.join("user");
+                predicates.add(cb.like(userJoin.get("username"), "%" + username + "%"));
+            }
+
+            // 不能调用name方法
+            if (status != null){
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        return ordersRepository.findAll(spec, pageable);
     }
 }

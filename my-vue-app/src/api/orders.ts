@@ -19,14 +19,14 @@ export function createOrder(data: CreateOrderRequest) {
     })
 }
 
-// 更新订单状态
-export function updateOrderStatus(id: number, data: String) {
-    return request<Orders>({
-        url: `/order/${id}/status`,
-        method: 'put',
-        data
-    })
-}
+// // 更新订单状态
+// export function updateOrderStatus(id: number, data: String) {
+//     return request<Orders>({
+//         url: `/order/${id}/status`,
+//         method: 'put',
+//         data
+//     })
+// }
 
 //查询订单详情
 export function getOrderDetail(id: number) {
@@ -54,5 +54,28 @@ export function getUserOrdersPage(id: number, pageNum: number, pageSize: number,
             pageSize,
             status: status === 'all' ? undefined : status  // 可选，为 undefined 时不发送该参数
         }
+    })
+}
+
+// 管理员获取订单分页
+export function getAdminOrdersPage(params: {
+    username?: string
+    status?: string
+    pageNum: number
+    pageSize: number
+}) {
+    return request({
+        url: '/order/adminpage',
+        method: 'get',
+        params
+    })
+}
+
+// 管理员修改订单状态
+export function updateOrderStatus(orderId: number, status: string) {
+    return request({
+        url: `/order/${orderId}/status`,
+        method: 'put',
+        params: { status }
     })
 }

@@ -1,5 +1,6 @@
 package com.example.demo.DTO.Responce;
 
+import com.example.demo.Enums.OrderStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -11,7 +12,7 @@ public class OrderResponse {
     private Long id;
     private Long userId;
     private BigDecimal totalPrice;
-    private String status;
+    private OrderStatus status;
     private LocalDateTime createTime;
 
     private List<Item> items;

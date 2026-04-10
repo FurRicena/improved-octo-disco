@@ -2,12 +2,14 @@ package com.example.demo.Controller;
 
 import com.example.demo.Common.Result;
 import com.example.demo.DTO.Request.OrderRequest;
+import com.example.demo.DTO.Responce.AdminOrderResponse;
 import com.example.demo.DTO.Responce.OrderResponse;
 import com.example.demo.Entity.Orders;
 import com.example.demo.Enums.OrderStatus;
 import com.example.demo.Service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +22,10 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    public OrderController(OrderService orderService){
+    public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
+
 
     @Operation(summary = "创建订单")
     @PostMapping
@@ -59,13 +62,37 @@ public class OrderController {
     @Operation(summary = "更新订单状态")
     @PutMapping("/{id}/status")
     public Result<Orders> updateStatus(@PathVariable Long id,
-                                       @RequestBody OrderStatus request){
-        return Result.success(orderService.updateOrderStatus(id, request));
+                                       @RequestParam OrderStatus status){
+        return Result.success(orderService.updateOrderStatus(id, status));
     }
 
     @Operation(summary = "查询所有订单")
     @GetMapping
     public Result<List<Orders>> getAllOrders(){
         return Result.success(orderService.getAllOrders());
+    }
+
+    // 新增,分页查询所有订单
+    @Operation(summary = "分页查询所有订单")
+    @GetMapping("/adminpage")
+//    @PreAuthorize("hasRole('ADMIN')")
+    public Result<Page<AdminOrderResponse>> getAdminOrdersPage(
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize
+    ) {
+        Page<Orders> page = orderService.getAdminOrdersPage(username, status, pageNum, pageSize);
+        Page<AdminOrderResponse> dtoPage = page.map(order -> {
+            AdminOrderResponse dto = new AdminOrderResponse();
+            BeanUtils.copyProperties(order, dto);
+            // 需要用户名：从订单关联的用户获取
+            dto.setUsername(order.getUser().getUsername());
+
+            System.out.println(order.getStatus());
+            System.out.println(dto.getStatus());
+            return dto;
+        });
+        return Result.success(dtoPage);
     }
 }
