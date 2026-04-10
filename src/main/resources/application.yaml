@@ -18,6 +18,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  ai:
+    dashscope:
+      api-key: sk-7136add4cb4845c4b250a169d7d1d7b4
 
 jwt:
   secret: "3Y8i4XpS2a/Z+H9B4E3OaN1g1RkYj/mJz+f9p7k+L8A="
