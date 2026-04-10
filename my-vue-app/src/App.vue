@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // import HelloWorld from './components/HelloWorld.vue'
-// import Login from './views/Login.vue'
-// import Register from './views/Register.vue'
+// import Login from './views/UserLogin.vue'
+// import Register from './views/UserRegister.vue'
 </script>
 
 <template>

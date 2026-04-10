@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 // 引入页面
-import Login from '@/views/Login.vue'
-import Register from '@/views/Register.vue'
-import Menu from "@/views/Menu.vue"
-import UserManage from "@/views/UserManage.vue"
+import UserLogin from '@/views/UserLogin.vue'
+import UserRegister from '@/views/UserRegister.vue'
+import AdminMenu from "@/views/AdminMenu.vue"
+import AdminUserManage from "@/views/AdminUserManage.vue"
 import OrderMenu from "@/views/OrderMenu.vue"
 import OrderSuccess from "@/views/OrderSuccess.vue"
 import MyOrders from "@/views/MyOrders.vue"
@@ -14,23 +14,23 @@ import AdminOrders from "@/views/AdminOrders.vue"
 const routes = [
     {
         path: '/login',
-        component: Login
+        component: UserLogin
     },
     {
         path: '/register',
-        component: Register
+        component: UserRegister
     },
     {
         path: '/',
         redirect: '/login' // 默认跳登录页
     },
     {
-        path: '/menu',
-        component: Menu
+        path: '/adminMenu',
+        component: AdminMenu
     },
     {
-        path: '/userManage',
-        component: UserManage
+        path: '/adminUserManage',
+        component: AdminUserManage
     },
     {
         path: '/orderMenu',
