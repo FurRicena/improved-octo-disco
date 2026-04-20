@@ -3,8 +3,16 @@ package com.example.demo.Service;
 import com.example.demo.Entity.Menu;
 import com.example.demo.Repository.MenuRepository;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -56,5 +64,28 @@ public class MenuService {
     @Schema(description = "按分类查询上架菜品")
     public List<Menu> getByCategory(String category) {
         return menuRepository.findByCategoryAndStatus(category, 1);
+    }
+
+    // 分页查询
+    @Schema(description = "分页查询")
+    public Page<Menu> getAdminMenuPage(String name, String category, Integer status, Integer pageNum, Integer pageSize) {
+        int currentPage = (pageNum == null || pageNum < 1) ? 1 : pageNum;
+        int size = (pageSize == null || pageSize < 1) ? 10 : Math.min(pageSize, 100);
+        Pageable pageable = PageRequest.of(currentPage - 1, size, Sort.by(Sort.Direction.ASC, "id"));
+
+        Specification<Menu> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (StringUtils.hasText(name)) {
+                predicates.add(cb.like(root.get("name"), "%" + name + "%"));
+            }
+            if (StringUtils.hasText(category)) {
+                predicates.add(cb.equal(root.get("category"), category));
+            }
+            if (status != null) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        return menuRepository.findAll(spec, pageable);
     }
 }

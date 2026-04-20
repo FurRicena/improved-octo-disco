@@ -43,3 +43,18 @@ export function deleteUser(id: number) {
         method: 'delete'
     })
 }
+
+// 管理员分页查询用户（只含普通用户）
+export function getAdminUserPage(params: {
+    username?: string
+    startTime?: string
+    endTime?: string
+    pageNum: number
+    pageSize: number
+}) {
+    return request<{ content: User[]; totalElements: number }>({
+        url: '/user/page',
+        method: 'get',
+        params
+    })
+}

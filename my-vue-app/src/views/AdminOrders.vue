@@ -13,6 +13,7 @@
           <el-option label="已接单" value="ACCEPTED" />
           <el-option label="制作中" value="COOKING" />
           <el-option label="已完成" value="FINISHED" />
+          <el-option label="已取消" value="CANCELLED" />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -182,8 +183,8 @@ const getStatusText = (status: string) => {
     PENDING: "待接单",
     ACCEPTED: "已接单",
     COOKING: "制作中",
-    FINISHED: "已完成"
-    // CANCELLED: '已取消'
+    FINISHED: "已完成",
+    CANCELLED: '已取消'
   }
   return map[status] || status
 }

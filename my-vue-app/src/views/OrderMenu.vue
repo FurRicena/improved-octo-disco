@@ -105,6 +105,56 @@
           <el-button block @click="cart.clearCart">清空购物车</el-button>
         </div>
       </el-card>
+
+      <!-- AI 推荐卡片 -->
+      <el-card class="ai-card" :body-style="{ padding: '16px' }">
+        <template #header>
+          <div class="ai-header">
+            <span>🤖 AI 点餐助手</span>
+          </div>
+        </template>
+        <div class="ai-recommend-bar">
+          <el-input
+              v-model="aiQuery"
+              placeholder="说句话，AI帮你点菜，比如：推荐两个辣的菜，30元以下"
+              size="small"
+              clearable
+              @keyup.enter="getAiRecommend"
+          />
+          <el-button type="info" size="small" @click="getAiRecommend" :loading="aiLoading">
+            推荐
+          </el-button>
+        </div>
+
+        <!-- AI 推荐结果：横向滚动卡片 -->
+        <div v-if="aiRecommendations.length > 0" class="ai-results">
+          <div class="ai-results-title">推荐菜品：</div>
+          <div class="ai-results-scroll">
+            <div v-for="item in aiRecommendations" :key="item.id" class="ai-card-item">
+              <div class="ai-card-img-wrapper">
+                <el-image
+                    v-if="item.imageUrl"
+                    :src="item.imageUrl"
+                    fit="cover"
+                    class="ai-card-img"
+                    lazy
+                >
+                  <template #error>
+                    <div class="image-placeholder">暂无图片</div>
+                  </template>
+                </el-image>
+                <div v-else class="image-placeholder">暂无图片</div>
+              </div>
+              <div class="ai-card-info">
+                <div class="ai-card-name">{{ item.name }}</div>
+                <div class="ai-card-price">¥{{ item.price.toFixed(2) }}</div>
+                <el-button type="primary" size="small" @click="addToCart(item)">添加</el-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </el-card>
+
     </div>
 
     <!-- 加入购物车数量选择弹窗 -->
@@ -128,7 +178,7 @@ import { ElMessage } from 'element-plus'
 import { useCartStore } from '@/stores/cart'
 import { useUserStore } from '@/stores/user'   // 需要你已有的用户store，或自己实现一个
 import { getMenuList } from '@/api/menu'        // 获取菜品API
-import { createOrder } from '@/api/orders'      // 创建订单API
+import {aiRecommend, createOrder} from '@/api/orders'      // 创建订单API
 import type { Menu } from "@/types/Menu.ts"
 
 // 使用stores
@@ -161,6 +211,43 @@ const filteredMenu = computed(() => {
   }
   return result
 })
+
+// ai
+const aiQuery = ref('')
+const aiLoading = ref(false)
+const aiRecommendations = ref<Menu[]>([])
+
+const getAiRecommend = async () => {
+  if (!aiQuery.value.trim()) return
+  aiLoading.value = true
+  try {
+    const res = await aiRecommend(aiQuery.value)
+    aiRecommendations.value = res.data
+  } catch (error) {
+    console.error('AI推荐失败', error)
+  } finally {
+    aiLoading.value = false
+  }
+}
+
+// 直接加入购物车（数量为1）
+const addToCart = (item: Menu) => {
+  if (item.id && item.name && item.price) {
+    cart.addItem(
+        {
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          imageUrl: item.imageUrl,
+        },
+        1
+    );
+    ElMessage.success(`已添加 ${item.name}`);
+  } else {
+    ElMessage.error('菜品信息不完整');
+  }
+};
+
 
 // 加入购物车弹窗
 const addDialogVisible = ref(false)
@@ -206,6 +293,7 @@ const submitOrder = async () => {
     await router.push('/login')
     return
   }
+  console.log(userId)
 
   // 构造请求数据
   const orderData = {
@@ -216,6 +304,7 @@ const submitOrder = async () => {
     })),
   }
 
+  console.log(orderData)
   submitting.value = true
   try {
     const newOrder = await createOrder(orderData)
@@ -430,5 +519,93 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 12px;
+}
+
+/* AI 卡片整体样式 */
+.ai-card {
+  margin-top: 20px;
+  border-radius: 12px;
+}
+.ai-header {
+  font-weight: bold;
+  font-size: 16px;
+}
+.ai-recommend-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.ai-results {
+  margin-top: 8px;
+}
+.ai-results-title {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+/* 横向滚动容器 */
+.ai-results-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+}
+/* 每个推荐卡片 - 固定宽度，与菜品卡片风格一致 */
+.ai-card-item {
+  flex-shrink: 0;
+  width: 120px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s;
+  text-align: center;
+  padding: 8px;
+}
+.ai-card-item:hover {
+  transform: translateY(-2px);
+}
+.ai-card-img-wrapper {
+  width: 100%;
+  height: 90px;
+  overflow: hidden;
+  border-radius: 6px;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ai-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 12px;
+  background: #f5f5f5;
+}
+.ai-card-info {
+  margin-top: 6px;
+}
+.ai-card-name {
+  font-size: 13px;
+  font-weight: 500;
+  margin: 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ai-card-price {
+  color: #f56c6c;
+  font-weight: bold;
+  font-size: 12px;
+  margin-bottom: 6px;
 }
 </style>

@@ -25,7 +25,7 @@
     </div>
 
     <!-- 用户表格 -->
-    <el-table :data="displayData" border stripe>
+    <el-table :data="displayData" border stripe v-loading="loading">
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="username" label="用户名" min-width="120" />
       <el-table-column prop="role" label="角色" width="100">
@@ -47,18 +47,20 @@
       </el-table-column>
     </el-table>
 
-    <!-- 分页 -->
+    <!-- 分页（后端分页） -->
     <div class="pagination-container">
       <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
+          :current-page="currentPage"
+          :page-size="pageSize"
           :total="total"
           :page-size-options="[10, 20, 30, 50]"
           layout="total, sizes, prev, pager, next, jumper"
+          @current-change="handleCurrentChange"
+          @size-change="handleSizeChange"
       />
     </div>
 
-    <!-- 新增/编辑用户弹窗 -->
+    <!-- 新增/编辑用户弹窗（保持不变） -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px">
       <el-form ref="formRef" :model="formData" label-width="80px">
         <el-form-item label="用户名" required>
@@ -81,7 +83,7 @@
       </template>
     </el-dialog>
 
-    <!-- 查看订单对话框 -->
+    <!-- 查看订单对话框（保持不变） -->
     <el-dialog v-model="orderDialogVisible" title="用户订单" width="800px">
       <el-tabs v-model="activeOrderTab" type="border-card">
         <el-tab-pane label="全部订单" name="all">
@@ -110,42 +112,47 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-// import { Plus } from '@element-plus/icons-vue'
-import {getUserList, updateUser, deleteUser, register} from '@/api/user'  // 假设的API
-import {getOrderDetail, getUserOrders} from "@/api/orders.ts";
-import type { User } from "@/types/User.ts";
-import type { Orders } from "@/types/Orders.ts";
-
+import { getAdminUserPage, updateUser, deleteUser, register } from '@/api/user'
+import { getOrderDetail, getUserOrders } from "@/api/orders.ts"
+import type { User } from "@/types/User.ts"
+import type { Orders } from "@/types/Orders.ts"
 
 // 搜索表单
 const searchForm = reactive({
   username: '',
-  createTimeRange: []
+  createTimeRange: [] as string[]
 })
 
 // 表格数据
-const tableData = ref<User[]>([])
 const displayData = ref<User[]>([])
+const loading = ref(false)
 
-//  分页相关
+// 分页相关
 const currentPage = ref(1)
 const pageSize = ref(10)
-// total 会自动跟随 displayData.value.length 变化
-const total = computed(() => displayData.value.length)
+const total = ref(0)
 
-// // 展示数据（前端分页用，建议后端分页直接使用tableData）
-// const displayData = computed(() => tableData.value)
-
-// 获取用户列表（只含USER角色）
+// 获取用户列表（后端分页，只查 role=USER）
 const fetchUserList = async () => {
+  loading.value = true
   try {
-    const res = await getUserList()
-    tableData.value = res.data
-    displayData.value = res.data
+    const params = {
+      username: searchForm.username || undefined,
+      startTime: searchForm.createTimeRange?.[0] || undefined,
+      endTime: searchForm.createTimeRange?.[1] || undefined,
+      pageNum: currentPage.value,
+      pageSize: pageSize.value
+    }
+    const res = await getAdminUserPage(params)
+    // 假设后端返回格式为 { content, totalElements }
+    displayData.value = res.data.content
+    total.value = res.data.totalElements
   } catch (error) {
     ElMessage.error('获取用户列表失败')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -160,12 +167,23 @@ const resetSearch = () => {
   handleSearch()
 }
 
+// 分页事件
+const handleCurrentChange = (page: number) => {
+  currentPage.value = page
+  fetchUserList()
+}
+const handleSizeChange = (size: number) => {
+  pageSize.value = size
+  currentPage.value = 1
+  fetchUserList()
+}
+
 // 新增/编辑弹窗
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
-// const formRef = ref(null)
+const formRef = ref()
 const formData = reactive({
-  id: null,
+  id: null as number | null,
   username: '',
   password: '',
   role: 'USER'
@@ -177,7 +195,7 @@ const openAddDialog = () => {
   dialogVisible.value = true
 }
 
-const openEditDialog = (row : User) => {
+const openEditDialog = (row: User) => {
   dialogTitle.value = '编辑用户'
   Object.assign(formData, { id: row.id, username: row.username, password: '', role: row.role })
   dialogVisible.value = true
@@ -191,17 +209,10 @@ const submitForm = async () => {
   try {
     if (formData.id) {
       // 编辑
-      if(formData.password) {
-        const payload = { username: formData.username, role: formData.role, password: formData.password }
-        await updateUser(formData.id, payload)
-        ElMessage.success('更新成功')
-      } else {
-        const payload = { username: formData.username, role: formData.role }
-        await updateUser(formData.id, payload)
-        ElMessage.success('更新成功')
-      }
-
-
+      const payload: any = { username: formData.username, role: formData.role }
+      if (formData.password) payload.password = formData.password
+      await updateUser(formData.id, payload)
+      ElMessage.success('更新成功')
     } else {
       // 新增
       if (!formData.password) {
@@ -223,13 +234,13 @@ const submitForm = async () => {
 }
 
 // 删除用户
-const handleDelete = (row : User) => {
+const handleDelete = (row: User) => {
   ElMessageBox.confirm(`确定删除用户“${row.username}”吗？`, '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
   }).then(async () => {
-    if(row.id) {
+    if (row.id) {
       await deleteUser(row.id)
       ElMessage.success('删除成功')
       await fetchUserList()
@@ -237,32 +248,21 @@ const handleDelete = (row : User) => {
   }).catch(() => {})
 }
 
-// 查看订单
+// 查看订单（保持不变）
 const orderDialogVisible = ref(false)
 const userOrders = ref<Orders[]>([])
 const activeOrderTab = ref('all')
 
-const viewOrders = async (user : User) => {
+const viewOrders = async (user: User) => {
   try {
     if (user.id) {
-      // 1. 获取订单列表（无 items）
       const res = await getUserOrders(user.id)
-      const orders = res.data  // Orders[]
-
-      // 2. 为每个订单请求详情（获取 items）
+      const orders = res.data
       const detailRequests = orders.map(order =>
           getOrderDetail(order.id)
-              .then(detailRes => {
-                // 合并 items，保留原订单其他字段
-                return { ...order, items: detailRes.data.items || [] }
-              })
-              .catch(err => {
-                console.error(`加载订单 ${order.id} 详情失败`, err)
-                return { ...order, items: [] }  // 失败时给空数组，避免表格空白
-              })
+              .then(detailRes => ({ ...order, items: detailRes.data.items || [] }))
+              .catch(() => ({ ...order, items: [] }))
       )
-
-      // 3. 等待所有详情加载完成,然后赋值并打开对话框
       userOrders.value = await Promise.all(detailRequests)
       orderDialogVisible.value = true
     }
@@ -271,17 +271,13 @@ const viewOrders = async (user : User) => {
   }
 }
 
-//    PENDING,   // 待接单
-// ACCEPTED,  // 已接单
-//     COOKING,   // 制作中
-//     FINISHED   // 已完成
-
 const getOrderStatusType = (status: 'PENDING' | 'ACCEPTED' | 'COOKING' | 'FINISHED'): string => {
   const map = {
     'PENDING': 'warning',
     'ACCEPTED': 'success',
     'COOKING': 'info',
-    'FINISHED': 'danger'
+    'FINISHED': 'danger',
+    'CANCELED': 'warning'
   }
   return map[status] || 'info'
 }
@@ -297,7 +293,33 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 复用原有样式，添加订单卡片样式 */
+/* 样式保持不变，可复用原有 */
+.user-management {
+  padding: 20px;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+.search-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background: white;
+  padding: 16px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.search-form {
+  flex: 1;
+}
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  background: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+}
 .order-card {
   border: 1px solid #ebeef5;
   border-radius: 8px;

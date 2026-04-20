@@ -88,9 +88,6 @@ public class OrderController {
             BeanUtils.copyProperties(order, dto);
             // 需要用户名：从订单关联的用户获取
             dto.setUsername(order.getUser().getUsername());
-
-            System.out.println(order.getStatus());
-            System.out.println(dto.getStatus());
             return dto;
         });
         return Result.success(dtoPage);

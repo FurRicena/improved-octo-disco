@@ -10,6 +10,7 @@ import com.example.demo.Enums.OrderStatus;
 import com.example.demo.Repository.MenuRepository;
 import com.example.demo.Repository.OrderItemRepository;
 import com.example.demo.Repository.OrdersRepository;
+import com.example.demo.Repository.UserRepository;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -32,13 +33,15 @@ public class OrderService {
     private final OrdersRepository ordersRepository;
     private final OrderItemRepository orderItemRepository;
     private final MenuRepository menuRepository;
+    private final UserRepository userRepository;
 
     public OrderService(OrdersRepository ordersRepository,
                         OrderItemRepository orderItemRepository,
-                        MenuRepository menuRepository) {
+                        MenuRepository menuRepository, UserRepository userRepository) {
         this.ordersRepository = ordersRepository;
         this.orderItemRepository = orderItemRepository;
         this.menuRepository = menuRepository;
+        this.userRepository = userRepository;
     }
 
     @Schema(description = "创建订单")
@@ -57,8 +60,11 @@ public class OrderService {
         }
 
         // 2. 创建订单
+        User user = userRepository.findById(request.getUserId()).orElseThrow(() -> new RuntimeException("请登录"));
+
         Orders orders = new Orders();
-        orders.setUserId(request.getUserId());
+//        orders.setUserId(request.getUserId());
+        orders.setUser(user);
         orders.setTotalPrice(total);
         orders.setStatus(OrderStatus.PENDING);
 
@@ -90,7 +96,7 @@ public class OrderService {
         int currentPage = (pageNum == null || pageNum < 1) ? 1 : pageNum;
         int pageSizeVal = (pageSize == null || pageSize < 1) ? 10 : Math.min(pageSize, 100); // 限制最大100条
         // 分页参数：PageRequest 的页码从0开始，所以需要 -1
-        Pageable pageable = PageRequest.of(currentPage - 1, pageSizeVal, Sort.by(Sort.Direction.DESC, "createTime"));
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSizeVal, Sort.by(Sort.Direction.ASC, "id"));
 
         // 2. 动态构建查询条件 (Specification)
         Specification<Orders> spec = (root, query, cb) -> {
@@ -151,17 +157,31 @@ public class OrderService {
 
         OrderStatus current = order.getStatus();
 
+        // 状态流转校验
+        boolean validTransition = false;
+
+
         // 状态流转校验（非常重要🔥）
         if(current == OrderStatus.PENDING && newStatus == OrderStatus.ACCEPTED){
-            order.setStatus(newStatus);
+            validTransition = true;
         } else if(current == OrderStatus.ACCEPTED && newStatus == OrderStatus.COOKING){
-            order.setStatus(newStatus);
+            validTransition = true;
         } else if(current == OrderStatus.COOKING && newStatus == OrderStatus.FINISHED){
-            order.setStatus(newStatus);
-        } else {
-            throw new RuntimeException("非法状态变更");
+            validTransition = true;
+        }
+        // 新增取消逻辑：允许从 PENDING、ACCEPTED、COOKING 取消
+        else if (newStatus == OrderStatus.CANCELLED
+                && (current == OrderStatus.PENDING
+                || current == OrderStatus.ACCEPTED
+                || current == OrderStatus.COOKING)) {
+            validTransition = true;
         }
 
+        if (!validTransition) {
+            throw new RuntimeException("非法状态变更: 从 " + current + " 到 " + newStatus);
+        }
+
+        order.setStatus(newStatus);
         return ordersRepository.save(order);
     }
 

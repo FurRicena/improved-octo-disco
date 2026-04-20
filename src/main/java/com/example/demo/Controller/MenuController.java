@@ -5,6 +5,7 @@ import com.example.demo.Entity.Menu;
 import com.example.demo.Service.MenuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -54,5 +55,19 @@ public class MenuController {
     @GetMapping("/category/{category}")
     public Result<List<Menu>> getByCategory(@PathVariable String category){
         return Result.success(menuService.getByCategory(category));
+    }
+
+    @Operation(summary = "分页查询")
+    @GetMapping("/page")
+//    @PreAuthorize("hasRole('ADMIN')")
+    public Result<Page<Menu>> getAdminMenuPage(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Integer status,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize
+    ) {
+        Page<Menu> page = menuService.getAdminMenuPage(name, category, status, pageNum, pageSize);
+        return Result.success(page);
     }
 }

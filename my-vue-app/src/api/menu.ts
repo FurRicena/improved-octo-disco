@@ -42,3 +42,18 @@ export function deleteMenu(id: number) {
         method: 'delete'
     })
 }
+
+// 获取菜品分页
+export function getAdminMenuPage(params: {
+    name?: string
+    category?: string
+    status?: number
+    pageNum: number
+    pageSize: number
+}) {
+    return request({
+        url: '/menu/page',
+        method: 'get',
+        params
+    })
+}

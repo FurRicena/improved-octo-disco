@@ -9,6 +9,7 @@ import com.example.demo.Utils.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -83,5 +84,18 @@ public class UserController {
     public Result<?> delete(@PathVariable Long id) {
         userService.delete(id);
         return Result.success(null);
+    }
+
+    @GetMapping("/page")
+//    @PreAuthorize("hasRole('ADMIN')")
+    public Result<Page<User>> getAdminUserPage(
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize
+    ) {
+        Page<User> page = userService.getAdminUserPage(username, startTime, endTime, pageNum, pageSize);
+        return Result.success(page);
     }
 }

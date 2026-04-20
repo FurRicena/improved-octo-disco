@@ -1,6 +1,7 @@
 import request from "@/utils/request.ts"
 import type {CreateOrderRequest, Orders} from "@/types/Orders.ts"
 import type { PageResult} from "@/types/PageResult.ts"
+import type {Menu} from "@/types/Menu.ts";
 
 // 查询所有订单
 export function getOrdersList() {
@@ -79,3 +80,24 @@ export function updateOrderStatus(orderId: number, status: string) {
         params: { status }
     })
 }
+
+// 1. AI 智能推荐（非流式，返回菜品列表）
+export function aiRecommend(message: string) {
+    return request<Menu[]>({
+        url: '/ai/recommend',
+        method: 'post',
+        data: { message }
+    })
+}
+
+// 2. 流式聊天（获取 SSE 流，返回 Fetch Response，需前端自行处理）
+// 注意：流式接口通常不经过 axios 拦截器，直接使用 fetch
+// export function aiStreamChat(message: string) {
+//     const baseURL = import.meta.env.VITE_API_BASE_URL || '/api'
+//     return fetch(`${baseURL}/ai/stream-chat?msg=${encodeURIComponent(message)}`, {
+//         method: 'GET',
+//         headers: {
+//             'Authorization': `Bearer ${localStorage.getItem('token')}`
+//         }
+//     })
+// }

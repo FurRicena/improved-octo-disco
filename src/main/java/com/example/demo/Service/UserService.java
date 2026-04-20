@@ -3,9 +3,19 @@ package com.example.demo.Service;
 import com.example.demo.Entity.User;
 import com.example.demo.Repository.UserRepository;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -56,5 +66,30 @@ public class UserService {
         userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
         userRepository.deleteById(id);
+    }
+
+    public Page<User> getAdminUserPage(String username, String startTime, String endTime, Integer pageNum, Integer pageSize) {
+        int currentPage = (pageNum == null || pageNum < 1) ? 1 : pageNum;
+        int size = (pageSize == null || pageSize < 1) ? 10 : Math.min(pageSize, 100);
+        Pageable pageable = PageRequest.of(currentPage - 1, size, Sort.by(Sort.Direction.ASC, "id"));
+
+        Specification<User> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            // 只查询普通用户
+            predicates.add(cb.equal(root.get("role"), "USER"));
+            if (StringUtils.hasText(username)) {
+                predicates.add(cb.like(root.get("username"), "%" + username + "%"));
+            }
+            if (StringUtils.hasText(startTime)) {
+                LocalDateTime start = LocalDate.parse(startTime).atStartOfDay();
+                predicates.add(cb.greaterThanOrEqualTo(root.get("createTime"), start));
+            }
+            if (StringUtils.hasText(endTime)) {
+                LocalDateTime end = LocalDate.parse(endTime).atTime(23, 59, 59);
+                predicates.add(cb.lessThanOrEqualTo(root.get("createTime"), end));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        return userRepository.findAll(spec, pageable);
     }
 }

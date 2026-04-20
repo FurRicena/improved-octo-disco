@@ -5,6 +5,6 @@ public enum OrderStatus {
     PENDING,   // 待接单
     ACCEPTED,  // 已接单
     COOKING,   // 制作中
-    FINISHED   // 已完成
-
+    FINISHED,   // 已完成
+    CANCELLED   // 已取消
 }

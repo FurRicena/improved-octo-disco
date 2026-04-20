@@ -28,7 +28,7 @@
         <div class="items-section">
           <h4>菜品清单</h4>
           <el-table :data="order.items || []" border stripe>
-            <el-table-column prop="menuName" label="菜品名称" min-width="150" />
+            <el-table-column prop="name" label="菜品名称" min-width="150" />
             <el-table-column prop="quantity" label="数量" width="80" align="center" />
             <el-table-column prop="price" label="单价" width="100" align="center">
               <template #default="{ row }">¥{{ row.price?.toFixed(2) }}</template>
@@ -41,7 +41,7 @@
 
         <!-- 操作按钮（根据状态显示） -->
         <div class="action-buttons" v-if="order.status === 'PENDING'">
-<!--          <el-button type="danger" @click="cancelOrder">取消订单</el-button>-->
+          <el-button type="danger" @click="cancelOrder">取消订单</el-button>
           <el-button type="success" @click="goPay">去支付</el-button>
         </div>
       </div>
@@ -52,9 +52,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import {ElMessage, ElMessageBox} from 'element-plus'
 // import { ElMessageBox} from "element-plus";
-import { getOrderDetail } from '@/api/orders'
+import {getOrderDetail, updateOrderStatus} from '@/api/orders'
 // import { cancelOrder as cancelOrderApi } from '@/api/orders'
 import type { Orders } from '@/types/Orders'
 
@@ -79,6 +79,7 @@ const fetchDetail = async () => {
   try {
     const res = await getOrderDetail(orderId.value)
     order.value = res.data
+    console.log(res.data)
   } catch (error) {
     ElMessage.error('获取订单详情失败')
     router.back()
@@ -88,20 +89,20 @@ const fetchDetail = async () => {
 }
 
 // 取消订单
-// const cancelOrder = async () => {
-//   await ElMessageBox.confirm('确定要取消该订单吗？', '提示', {
-//     confirmButtonText: '确定',
-//     cancelButtonText: '取消',
-//     type: 'warning'
-//   })
-//   try {
-//     await cancelOrderApi(order.value!.id)
-//     ElMessage.success('订单已取消')
-//     fetchDetail()  // 刷新状态
-//   } catch (error) {
-//     ElMessage.error('取消失败')
-//   }
-// }
+const cancelOrder = async () => {
+  await ElMessageBox.confirm('确定要取消该订单吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+  try {
+    await updateOrderStatus(order.value!.id, "CANCELLED")
+    ElMessage.success('订单已取消')
+    await fetchDetail()  // 刷新状态
+  } catch (error) {
+    ElMessage.error('取消失败')
+  }
+}
 
 const goPay = () => {
   // 跳转到支付页面（如果有）
@@ -118,7 +119,8 @@ const getStatusType = (status: string) => {
     PENDING: 'warning',
     ACCEPTED: 'primary',
     COOKING: 'info',
-    FINISHED: 'success'
+    FINISHED: 'success',
+    CANCELLED: 'warning'
   }
   return map[status] || 'info'
 }
@@ -128,7 +130,8 @@ const getStatusText = (status: string) => {
     PENDING: '待接单',
     ACCEPTED: '已接单',
     COOKING: '制作中',
-    FINISHED: '已完成'
+    FINISHED: '已完成',
+    CANCELLED: '已取消'
   }
   return map[status] || status
 }

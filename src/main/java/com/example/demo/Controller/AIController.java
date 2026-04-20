@@ -1,29 +1,40 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Common.Result;
+import com.example.demo.Entity.Menu;
+import com.example.demo.Repository.MenuRepository;
 import com.example.demo.Service.AIService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
+import com.example.demo.Utils.MenuSpecifications;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/ai")
 public class AIController {
 
     private final AIService aiService;
+    private final MenuRepository menuRepository;
 
-    public AIController(AIService aiService) {
+    public AIController(AIService aiService, MenuRepository menuRepository) {
         this.aiService = aiService;
+        this.menuRepository = menuRepository;
     }
 
-    @GetMapping("/chat")
-    public String chat(@RequestParam String msg) {
-        return aiService.chat(msg);
-    }
-
-    @GetMapping(value = "/stream-chat", produces = "text/event-stream")
-    public Flux<String> streamChat(@RequestParam String msg) {
-        return aiService.streamChat(msg);
+    @PostMapping("/recommend")
+    public Result<List<Menu>> aiRecommend(@RequestBody Map<String, String> request) {
+        String userMessage = request.get("message");
+        // 1. AI 解析用户意图
+        AIService.QueryParams params = aiService.parseUserIntent(userMessage);
+        // 2. 用解析出的参数查询数据库
+        Specification<Menu> spec = MenuSpecifications.withParams(params);
+        List<Menu> menus = menuRepository.findAll(spec);
+        // 3. 限制返回数量
+        if (menus.size() > params.limit) {
+            menus = menus.subList(0, params.limit);
+        }
+        return Result.success(menus);
     }
 }

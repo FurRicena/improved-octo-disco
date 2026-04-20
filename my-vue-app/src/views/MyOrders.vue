@@ -9,6 +9,7 @@
       <el-tab-pane label="已接单" name="ACCEPTED" />
       <el-tab-pane label="制作中" name="COOKING" />
       <el-tab-pane label="已完成" name="FINISHED" />
+      <el-tab-pane label="已取消" name="CANCELLED" />
     </el-tabs>
 
     <!-- 订单列表 -->
@@ -88,7 +89,6 @@ const fetchOrders = async () => {
         pageSize.value,
         activeStatus.value === 'all' ? undefined : activeStatus.value
     )
-    // res 已经是 PageResult 对象（如果 request 拦截器返回了 data）
     console.log(currentPage.value)
     orderList.value = res.data.content
     total.value = res.data.totalElements
@@ -123,7 +123,8 @@ const getStatusType = (status: string) => {
     PENDING: 'warning',
     ACCEPTED: 'primary',
     COOKING: 'info',
-    FINISHED: 'success'
+    FINISHED: 'success',
+    CANCELLED: 'danger'
   }
   return map[status] || 'info'
 }
@@ -133,7 +134,8 @@ const getStatusText = (status: string) => {
     PENDING: '待接单',
     ACCEPTED: '已接单',
     COOKING: '制作中',
-    FINISHED: '已完成'
+    FINISHED: '已完成',
+    CANCELLED: '已取消'
   }
   return map[status] || status
 }
