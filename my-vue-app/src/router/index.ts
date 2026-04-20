@@ -28,7 +28,13 @@ const routes = [
             // 管理员页面
             { path: 'admin/menu', name: 'AdminMenu', component: AdminMenu, meta: { title: '菜品管理', requiresAuth: true, roles: ['ADMIN'] } },
             { path: 'admin/orders', name: 'AdminOrders', component: AdminOrders, meta: { title: '订单管理', requiresAuth: true, roles: ['ADMIN'] } },
-            { path: 'admin/users', name: 'AdminUserManage', component: AdminUserManage, meta: { title: '用户管理', requiresAuth: true, roles: ['ADMIN'] } }
+            { path: 'admin/users', name: 'AdminUserManage', component: AdminUserManage, meta: { title: '用户管理', requiresAuth: true, roles: ['ADMIN'] } },
+            {
+                path: '/admin/statistics',
+                name: 'AdminStatistics',
+                component: () => import('@/views/AdminStatistics.vue'),
+                meta: { requiresAuth: true, roles: ['ADMIN'] }
+            }
         ]
     },
 ]
