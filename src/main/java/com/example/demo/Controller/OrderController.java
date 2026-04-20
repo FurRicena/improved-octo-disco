@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.List;
 @Tag(name = "订单接口")
 @RestController
 @RequestMapping("/order")
+@PreAuthorize("isAuthenticated()")
 public class OrderController {
 
     private final OrderService orderService;
@@ -61,6 +63,7 @@ public class OrderController {
 
     @Operation(summary = "更新订单状态")
     @PutMapping("/{id}/status")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Result<Orders> updateStatus(@PathVariable Long id,
                                        @RequestParam OrderStatus status){
         return Result.success(orderService.updateOrderStatus(id, status));
@@ -68,6 +71,7 @@ public class OrderController {
 
     @Operation(summary = "查询所有订单")
     @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Result<List<Orders>> getAllOrders(){
         return Result.success(orderService.getAllOrders());
     }
@@ -75,6 +79,7 @@ public class OrderController {
     // 新增,分页查询所有订单
     @Operation(summary = "分页查询所有订单")
     @GetMapping("/adminpage")
+    @PreAuthorize("hasAuthority('ADMIN')")
 //    @PreAuthorize("hasRole('ADMIN')")
     public Result<Page<AdminOrderResponse>> getAdminOrdersPage(
             @RequestParam(required = false) String username,

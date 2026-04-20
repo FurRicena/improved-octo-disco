@@ -6,6 +6,7 @@ import com.example.demo.Service.MenuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @Tag(name = "菜品接口")
 @RestController
 @RequestMapping("/menu")
+@PreAuthorize("isAuthenticated()")
 public class MenuController {
     private final MenuService menuService;
 
@@ -22,18 +24,21 @@ public class MenuController {
 
     @Operation(summary = "新增菜品")
     @PostMapping("/addMenu")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Result<Menu> addMenu(@RequestBody Menu menu){
         return Result.success(menuService.addMenu(menu));
     }
 
     @Operation(summary = "修改菜品")
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Result<Menu> updateMenu(@PathVariable Long id, @RequestBody Menu menu){
         return Result.success(menuService.updateMenu(id, menu));
     }
 
     @Operation(summary = "删除菜品")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Result<?> deleteMenu(@PathVariable Long id){
         menuService.deleteMenu(id);
         return Result.success(null);

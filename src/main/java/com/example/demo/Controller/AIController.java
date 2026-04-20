@@ -6,6 +6,7 @@ import com.example.demo.Repository.MenuRepository;
 import com.example.demo.Service.AIService;
 import com.example.demo.Utils.MenuSpecifications;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/ai")
+@PreAuthorize("isAuthenticated()")
 public class AIController {
 
     private final AIService aiService;

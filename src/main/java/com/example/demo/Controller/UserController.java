@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -69,25 +70,28 @@ public class UserController {
 
     @Operation(summary = "查询所有用户")
     @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Result<?> getAll(){
         return Result.success(userService.getAll());
     }
 
     @Operation(summary = "按id修改用户")
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Result<User> update(@PathVariable Long id,@RequestBody User user){
         return Result.success(userService.update(id, user));
     }
 
     @Operation(summary = "按id删除用户")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Result<?> delete(@PathVariable Long id) {
         userService.delete(id);
         return Result.success(null);
     }
 
     @GetMapping("/page")
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Result<Page<User>> getAdminUserPage(
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String startTime,

@@ -65,7 +65,7 @@ const copyOrderId = () => {
 
 const viewOrder = () => {
   router.push({
-    path: `/orderDetail`,
+    path: `/order-detail`,
     query: {
       orderId: orderId.value
     }
@@ -73,7 +73,7 @@ const viewOrder = () => {
 }
 
 const continueOrder = () => {
-  router.push('/orderMenu')  // 返回点菜页面
+  router.push('/order')  // 返回点菜页面
 }
 
 const goPay = () => {

@@ -14,6 +14,11 @@ request.interceptors.response.use(
             ElMessage.error(res.data.msg || "请求失败")
             return Promise.reject(new Error(res.data.message))
         }
+        if (res.data.code === 401 || res.data.code === 403) {
+            localStorage.removeItem('token')
+            localStorage.removeItem('userInfo')
+            window.location.href = '/login'
+        }
         return res.data
     },
     (err) => {

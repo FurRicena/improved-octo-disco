@@ -19,7 +19,7 @@ const form = reactive<LoginForm>({
 const handleLogin = async () => {
   await userStore.login(form)
   ElMessage.success("登录成功")
-  await router.push('/orderMenu')
+  await router.push('/')
 }
 </script>
 

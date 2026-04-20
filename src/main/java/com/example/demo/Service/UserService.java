@@ -1,6 +1,7 @@
 package com.example.demo.Service;
 
 import com.example.demo.Entity.User;
+import com.example.demo.Enums.UserRole;
 import com.example.demo.Repository.UserRepository;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.criteria.Predicate;

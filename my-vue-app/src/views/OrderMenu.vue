@@ -21,139 +21,143 @@
       </el-select>
     </div>
 
+    <!-- 内容行：网格 + 侧边栏 -->
+    <div class="content-row">
     <!-- 菜品展示区（网格布局） -->
-    <div class="menu-grid">
-      <el-card
-          v-for="item in filteredMenu"
-          :key="item.id"
-          class="menu-card"
-          shadow="hover"
-          body-style="padding: 12px"
-      >
-        <div class="menu-img-wrapper">
-          <el-image
-              v-if="item.imageUrl"
-              :src="item.imageUrl"
-              fit="cover"
-              class="menu-img"
-              lazy
-          >
-            <template #error>
-              <div class="image-placeholder">暂无图片</div>
-            </template>
-          </el-image>
-          <div v-else class="image-placeholder">暂无图片</div>
-        </div>
-        <div class="menu-info">
-          <h4 class="menu-name">{{ item.name }}</h4>
-          <p class="menu-price">¥{{ item.price.toFixed(2) }}</p>
-          <el-button type="primary" size="small" @click="openAddDialog(item)">
-            加入购物车
-          </el-button>
-        </div>
-      </el-card>
-    </div>
-
-    <!-- 购物车侧边栏 -->
-    <div class="cart-sidebar">
-      <el-card class="cart-card" :body-style="{ padding: '16px' }">
-        <template #header>
-          <div class="cart-header">
-            <span>我的点单</span>
-            <span class="cart-count">{{ cart.totalCount }}件</span>
+      <div class="menu-grid">
+        <el-card
+            v-for="item in filteredMenu"
+            :key="item.id"
+            class="menu-card"
+            shadow="hover"
+            body-style="padding: 12px"
+        >
+          <div class="menu-img-wrapper">
+            <el-image
+                v-if="item.imageUrl"
+                :src="item.imageUrl"
+                fit="cover"
+                class="menu-img"
+                lazy
+            >
+              <template #error>
+                <div class="image-placeholder">暂无图片</div>
+              </template>
+            </el-image>
+            <div v-else class="image-placeholder">暂无图片</div>
           </div>
-        </template>
+          <div class="menu-info">
+            <h4 class="menu-name">{{ item.name }}</h4>
+            <p class="menu-price">¥{{ item.price.toFixed(2) }}</p>
+            <el-button type="primary" size="small" @click="openAddDialog(item)">
+              加入购物车
+            </el-button>
+          </div>
+        </el-card>
+      </div>
 
-        <div v-if="cart.items.length === 0" class="empty-cart">
-          <el-empty description="购物车空空如也" :image-size="80" />
-        </div>
-
-        <div v-else class="cart-list">
-          <div v-for="item in cart.items" :key="item.menuId" class="cart-item">
-            <div class="cart-item-info">
-              <div class="cart-item-name">{{ item.name }}</div>
-              <div class="cart-item-price">¥{{ item.price.toFixed(2) }}</div>
+      <!-- 购物车侧边栏 -->
+      <div class="cart-sidebar">
+        <el-card class="cart-card" :body-style="{ padding: '16px' }">
+          <template #header>
+            <div class="cart-header">
+              <span>我的点单</span>
+              <span class="cart-count">{{ cart.totalCount }}件</span>
             </div>
-            <div class="cart-item-actions">
-              <el-input-number
-                  v-model="item.quantity"
-                  :min="1"
-                  size="small"
-                  controls-position="right"
-                  @change="(val: number) => cart.updateQuantity(item.menuId, val)"
-              />
-              <el-button link type="danger" size="small" @click="cart.removeItem(item.menuId)">
-                删除
-              </el-button>
-            </div>
-            <div class="cart-item-subtotal">
-              ¥{{ (item.price * item.quantity).toFixed(2) }}
-            </div>
+          </template>
+
+          <div v-if="cart.items.length === 0" class="empty-cart">
+            <el-empty description="购物车空空如也" :image-size="80" />
           </div>
-        </div>
 
-        <el-divider v-if="cart.items.length > 0" />
-
-        <div v-if="cart.items.length > 0" class="cart-footer">
-          <div class="cart-total">
-            <span>合计</span>
-            <span class="total-price">¥{{ cart.totalPrice.toFixed(2) }}</span>
-          </div>
-          <el-button type="success" block @click="submitOrder" :loading="submitting">
-            去结算
-          </el-button>
-          <el-button block @click="cart.clearCart">清空购物车</el-button>
-        </div>
-      </el-card>
-
-      <!-- AI 推荐卡片 -->
-      <el-card class="ai-card" :body-style="{ padding: '16px' }">
-        <template #header>
-          <div class="ai-header">
-            <span>🤖 AI 点餐助手</span>
-          </div>
-        </template>
-        <div class="ai-recommend-bar">
-          <el-input
-              v-model="aiQuery"
-              placeholder="说句话，AI帮你点菜，比如：推荐两个辣的菜，30元以下"
-              size="small"
-              clearable
-              @keyup.enter="getAiRecommend"
-          />
-          <el-button type="info" size="small" @click="getAiRecommend" :loading="aiLoading">
-            推荐
-          </el-button>
-        </div>
-
-        <!-- AI 推荐结果：横向滚动卡片 -->
-        <div v-if="aiRecommendations.length > 0" class="ai-results">
-          <div class="ai-results-title">推荐菜品：</div>
-          <div class="ai-results-scroll">
-            <div v-for="item in aiRecommendations" :key="item.id" class="ai-card-item">
-              <div class="ai-card-img-wrapper">
-                <el-image
-                    v-if="item.imageUrl"
-                    :src="item.imageUrl"
-                    fit="cover"
-                    class="ai-card-img"
-                    lazy
-                >
-                  <template #error>
-                    <div class="image-placeholder">暂无图片</div>
-                  </template>
-                </el-image>
-                <div v-else class="image-placeholder">暂无图片</div>
+          <div v-else class="cart-list">
+            <div v-for="item in cart.items" :key="item.menuId" class="cart-item">
+              <div class="cart-item-info">
+                <div class="cart-item-name">{{ item.name }}</div>
+                <div class="cart-item-price">¥{{ item.price.toFixed(2) }}</div>
               </div>
-              <div class="ai-card-info">
-                <div class="ai-card-name">{{ item.name }}</div>
-                <div class="ai-card-price">¥{{ item.price.toFixed(2) }}</div>
-                <el-button type="primary" size="small" @click="addToCart(item)">添加</el-button>
+              <div class="cart-item-actions">
+                <el-input-number
+                    v-model="item.quantity"
+                    :min="1"
+                    size="small"
+                    controls-position="right"
+                    @change="(val: number) => cart.updateQuantity(item.menuId, val)"
+                />
+                <el-button link type="danger" size="small" @click="cart.removeItem(item.menuId)">
+                  删除
+                </el-button>
+              </div>
+              <div class="cart-item-subtotal">
+                ¥{{ (item.price * item.quantity).toFixed(2) }}
               </div>
             </div>
           </div>
-        </div>
-      </el-card>
+
+          <el-divider v-if="cart.items.length > 0" />
+
+          <div v-if="cart.items.length > 0" class="cart-footer">
+            <div class="cart-total">
+              <span>合计</span>
+              <span class="total-price">¥{{ cart.totalPrice.toFixed(2) }}</span>
+            </div>
+            <el-button type="success" block @click="submitOrder" :loading="submitting">
+              去结算
+            </el-button>
+            <el-button block @click="cart.clearCart">清空购物车</el-button>
+          </div>
+        </el-card>
+
+        <!-- AI 推荐卡片 -->
+        <el-card class="ai-card" :body-style="{ padding: '16px' }">
+          <template #header>
+            <div class="ai-header">
+              <span>🤖 AI 点餐助手</span>
+            </div>
+          </template>
+          <div class="ai-recommend-bar">
+            <el-input
+                v-model="aiQuery"
+                placeholder="说句话，AI帮你点菜，比如：推荐两个辣的菜，30元以下"
+                size="small"
+                clearable
+                @keyup.enter="getAiRecommend"
+            />
+            <el-button type="info" size="small" @click="getAiRecommend" :loading="aiLoading">
+              推荐
+            </el-button>
+          </div>
+
+          <!-- AI 推荐结果：横向滚动卡片 -->
+          <div v-if="aiRecommendations.length > 0" class="ai-results">
+            <div class="ai-results-title">推荐菜品：</div>
+            <div class="ai-results-scroll">
+              <div v-for="item in aiRecommendations" :key="item.id" class="ai-card-item">
+                <div class="ai-card-img-wrapper">
+                  <el-image
+                      v-if="item.imageUrl"
+                      :src="item.imageUrl"
+                      fit="cover"
+                      class="ai-card-img"
+                      lazy
+                  >
+                    <template #error>
+                      <div class="image-placeholder">暂无图片</div>
+                    </template>
+                  </el-image>
+                  <div v-else class="image-placeholder">暂无图片</div>
+                </div>
+                <div class="ai-card-info">
+                  <div class="ai-card-name">{{ item.name }}</div>
+                  <div class="ai-card-price">¥{{ item.price.toFixed(2) }}</div>
+                  <el-button type="primary" size="small" @click="addToCart(item)">添加</el-button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </el-card>
+
+      </div>
 
     </div>
 
@@ -244,6 +248,7 @@ const addToCart = (item: Menu) => {
     );
     ElMessage.success(`已添加 ${item.name}`);
   } else {
+    console.log(item)
     ElMessage.error('菜品信息不完整');
   }
 };
@@ -313,7 +318,7 @@ const submitOrder = async () => {
     // 可选：跳转到订单详情页或我的订单页
     // await router.push(`/my-orders?orderId=${newOrder.data.id}`)
     await router.push({
-      path: '/orderSuccess',
+      path: '/order-success',
       query: {
         orderId: newOrder.data.id,
         totalPrice: newOrder.data.totalPrice,
@@ -351,37 +356,38 @@ onMounted(() => {
 <style scoped>
 .order-menu {
   display: flex;
-  gap: 24px;
+  flex-direction: column;   /* 垂直排列 */
+  gap: 20px;
   padding: 20px;
-  min-height: 100vh;
   background: #f5f7fa;
+  min-height: 100vh;
 }
 
-/* 筛选栏 */
+/* 搜索栏 - 不再固定定位，正常流式 */
 .filter-bar {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  right: 20px;
-  z-index: 10;
   display: flex;
   gap: 12px;
   background: white;
   padding: 12px 20px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
+  /* 移除 position, top, left, right, margin-bottom 等 */
+}
+
+/* 内容行：网格 + 侧边栏并排 */
+.content-row {
+  display: flex;
+  gap: 24px;
 }
 
 /* 菜品网格区域 */
 .menu-grid {
   flex: 3;
-  margin-top: 70px; /* 为固定筛选栏留出空间 */
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px;
+  /* 移除 margin-top */
 }
-
 .menu-card {
   cursor: pointer;
   transition: transform 0.2s;
@@ -438,9 +444,9 @@ onMounted(() => {
   flex: 1;
   min-width: 280px;
   position: sticky;
-  top: 90px;
+  top: 20px;        /* 侧边栏粘性定位 */
   height: fit-content;
-  margin-top: 70px;
+  /* 移除 margin-top */
 }
 
 .cart-card {
