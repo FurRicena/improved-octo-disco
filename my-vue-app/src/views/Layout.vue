@@ -101,7 +101,8 @@ const menuList = computed<MenuItem[]>(() => {
           { path: '/admin/menu', name: '菜品管理', icon: 'Dish', meta: { roles: ['ADMIN'] } },
           { path: '/admin/orders', name: '订单管理', icon: 'Tickets', meta: { roles: ['ADMIN'] } },
           { path: '/admin/users', name: '用户管理', icon: 'User', meta: { roles: ['ADMIN'] } },
-          { path: '/admin/statistics', name: '销量统计', icon: 'DataLine', meta: { roles: ['ADMIN'] } }
+          { path: '/admin/statistics', name: '销量统计', icon: 'DataLine', meta: { roles: ['ADMIN'] } },
+          { path: '/admin/dashboard', name: '数据仪表盘', icon: 'DataLine', meta: { roles: ['ADMIN'] } }
         ]
       }
     ]

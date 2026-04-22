@@ -34,6 +34,12 @@ const routes = [
                 name: 'AdminStatistics',
                 component: () => import('@/views/AdminStatistics.vue'),
                 meta: { requiresAuth: true, roles: ['ADMIN'] }
+            },
+            {
+                path: '/admin/dashboard',
+                name: 'AdminDashboard',
+                component: () => import('@/views/AdminDashboard.vue'),
+                meta: { requiresAuth: true, roles: ['ADMIN'] }
             }
         ]
     },

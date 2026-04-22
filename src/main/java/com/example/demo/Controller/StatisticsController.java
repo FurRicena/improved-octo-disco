@@ -1,7 +1,8 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Common.Result;
-import com.example.demo.DTO.Responce.MenuSales;
+import com.example.demo.DTO.DashboardData;
+import com.example.demo.DTO.MenuSales;
 import com.example.demo.Service.StatisticsService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,5 +27,17 @@ public class StatisticsController {
     @GetMapping("/menu-sales")
     public Result<List<MenuSales>> getMenuSales() {
         return Result.success(statisticsService.getMenuSalesStatistics());
+    }
+
+    @GetMapping("/dashboard")
+    public Result<DashboardData> getDashboardData() {
+        DashboardData data = new DashboardData();
+        data.setTotalUsers(statisticsService.getTotalUserCount());
+        data.setTotalOrders(statisticsService.getTotalOrderCount());
+        data.setTotalSales(statisticsService.getTotalSales());
+        data.setLast7DaysTrend(statisticsService.getLast7DaysOrderTrend());
+        data.setTop5Menus(statisticsService.getTop5MenuSales());
+        data.setStatusDistribution(statisticsService.getOrderStatusDistribution());
+        return Result.success(data);
     }
 }
