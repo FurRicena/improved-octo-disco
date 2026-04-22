@@ -58,3 +58,13 @@ export function getAdminUserPage(params: {
         params
     })
 }
+
+export const exportUsers = (params?: {
+    username?: string
+}) => {
+    return request({
+        url: '/user/export',
+        params,
+        responseType: 'blob'
+    })
+}

@@ -24,6 +24,7 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch">搜索</el-button>
           <el-button @click="resetSearch">重置</el-button>
+          <el-button type="warning" @click="exportMenusHandler" :loading="exportLoading">导出菜品</el-button>
         </el-form-item>
       </el-form>
       <el-button type="success" @click="openAddDialog">+ 新增菜品</el-button>
@@ -138,7 +139,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElLoading, ElMessage, ElMessageBox, type FormInstance, type UploadFile, type UploadProps } from 'element-plus'
-import { addMenu, deleteMenu, updateMenu, getAdminMenuPage } from "@/api/menu.ts"
+import {addMenu, deleteMenu, updateMenu, getAdminMenuPage, exportMenus} from "@/api/menu.ts"
 import { uploadFile } from "@/api/upload.ts"
 import type { Menu } from "@/types/Menu.ts"
 import { Plus } from "@element-plus/icons-vue"
@@ -331,6 +332,50 @@ const handleDelete = (row: Menu) => {
       loadingInstance.close()
     }
   }).catch(() => {})
+}
+
+
+const exportLoading = ref(false)
+
+const exportMenusHandler = async () => {
+  exportLoading.value = true
+  try {
+    const params = {
+      name: searchForm.name || undefined,
+      category: searchForm.category || undefined,
+      status: searchForm.status || undefined
+    }
+    const response = await exportMenus(params)
+
+    // 判断响应类型是否是 application/json（表示后端返回了错误）
+    const contentType = response.headers['content-type'] || ''
+    if (contentType.includes('application/json')) {
+      // 将 blob 转为字符串读取错误信息
+      const text = await response.data.text()
+      const errorData = JSON.parse(text)
+      ElMessage.error(errorData.msg || '导出失败')
+      return
+    }
+
+    // 正常导出 Excel
+    const blob = new Blob([response.data], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `menus_${new Date().getTime()}.xlsx`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    ElMessage.success('导出成功')
+  } catch (error) {
+    ElMessage.error('导出失败，请重试')
+  } finally {
+    exportLoading.value = false
+  }
 }
 
 // 格式化日期

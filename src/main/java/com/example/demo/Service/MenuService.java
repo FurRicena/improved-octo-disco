@@ -1,5 +1,6 @@
 package com.example.demo.Service;
 
+import com.example.demo.DTO.MenuExportDTO;
 import com.example.demo.Entity.Menu;
 import com.example.demo.Repository.MenuRepository;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,8 +13,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MenuService {
@@ -87,5 +90,37 @@ public class MenuService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
         return menuRepository.findAll(spec, pageable);
+    }
+
+
+    // MenuService.java
+    public List<MenuExportDTO> getMenusForExport(String name, String category, Integer status) {
+        // 复用已有的查询逻辑（不分页）
+        Specification<Menu> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (StringUtils.hasText(name)) {
+                predicates.add(cb.like(root.get("name"), "%" + name + "%"));
+            }
+            if (StringUtils.hasText(category)) {
+                predicates.add(cb.equal(root.get("category"), category));
+            }
+            if (status != null) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        List<Menu> menus = menuRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "createTime"));
+        return menus.stream().map(this::convertToExportDTO).collect(Collectors.toList());
+    }
+
+    private MenuExportDTO convertToExportDTO(Menu menu) {
+        MenuExportDTO dto = new MenuExportDTO();
+        dto.setId(menu.getId());
+        dto.setName(menu.getName());
+        dto.setCategory(menu.getCategory());
+        dto.setPrice(menu.getPrice());
+        dto.setStatusText(menu.getStatus() == 1 ? "上架" : "下架");
+        dto.setCreateTime(menu.getCreateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        return dto;
     }
 }

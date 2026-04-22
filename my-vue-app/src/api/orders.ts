@@ -90,6 +90,18 @@ export function aiRecommend(message: string) {
     })
 }
 
+export const exportOrders = (params?: {
+    username?: string
+    status?: string
+}) => {
+    return request({
+        url: `/order/export`,
+        method: 'get',
+        params,
+        responseType: 'blob'
+    })
+}
+
 // 2. 流式聊天（获取 SSE 流，返回 Fetch Response，需前端自行处理）
 // 注意：流式接口通常不经过 axios 拦截器，直接使用 fetch
 // export function aiStreamChat(message: string) {

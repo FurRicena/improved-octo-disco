@@ -3,12 +3,15 @@ package com.example.demo.Controller;
 import com.example.demo.Annotation.Log;
 import com.example.demo.Common.Result;
 import com.example.demo.DTO.Responce.JwtResponse;
+import com.example.demo.DTO.UserExportDTO;
 import com.example.demo.Entity.User;
 import com.example.demo.Security.UserDetailsImpl;
 import com.example.demo.Service.UserService;
+import com.example.demo.Utils.ExcelExporter;
 import com.example.demo.Utils.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +19,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
 
 // import java.util.List;
 
@@ -107,5 +114,33 @@ public class UserController {
     ) {
         Page<User> page = userService.getAdminUserPage(username, startTime, endTime, pageNum, pageSize);
         return Result.success(page);
+    }
+
+
+    @GetMapping("/export")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public void exportUsers(@RequestParam(required = false) String username,
+                            HttpServletResponse response) {
+        try {
+            System.out.println("导出用户参数：username=" + username);
+            List<UserExportDTO> exportData = userService.getUsersForExport(username);
+
+            String[] fieldNames = {"id", "username", "role", "createTime"};
+            String[] columnHeaders = {"用户ID", "用户名", "角色", "注册时间"};
+
+            ExcelExporter.exportToExcel(exportData, "Users", columnHeaders, fieldNames, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.reset();
+            response.setContentType("application/json;charset=UTF-8");
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            String errorJson = String.format("{\"code\":500,\"msg\":\"导出失败: %s\"}", e.getMessage());
+            try (PrintWriter writer = response.getWriter()) {
+                writer.write(errorJson);
+                writer.flush();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }
     }
 }

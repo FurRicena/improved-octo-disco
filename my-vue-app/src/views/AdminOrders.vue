@@ -19,6 +19,7 @@
       <el-form-item>
         <el-button type="primary" @click="handleSearch">搜索</el-button>
         <el-button @click="resetSearch">重置</el-button>
+        <el-button type="warning" @click="exportOrdersHandler" :loading="exportLoading">导出订单</el-button>
       </el-form-item>
     </el-form>
 
@@ -87,7 +88,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getAdminOrdersPage, updateOrderStatus } from '@/api/orders'
+import {exportOrders, getAdminOrdersPage, updateOrderStatus} from '@/api/orders'
 import type { Orders } from '@/types/Orders'
 
 // 扩展订单类型，添加用户名
@@ -192,6 +193,48 @@ const getStatusText = (status: string) => {
 const formatDate = (dateStr: string) => {
   if (!dateStr) return ''
   return new Date(dateStr).toLocaleString()
+}
+
+const exportLoading = ref(false)
+
+const exportOrdersHandler = async () => {
+  exportLoading.value = true
+  try {
+    const params = {
+      username: searchForm.username || undefined,
+      status: searchForm.status || undefined
+    }
+    const response = await exportOrders(params)
+
+    // 关键：判断响应类型是否是 application/json（表示后端返回了错误）
+    const contentType = response.headers['content-type'] || ''
+    if (contentType.includes('application/json')) {
+      // 将 blob 转为字符串读取错误信息
+      const text = await response.data.text()
+      const errorData = JSON.parse(text)
+      ElMessage.error(errorData.msg || '导出失败')
+      return
+    }
+
+    // 正常导出 Excel
+    const blob = new Blob([response.data], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `orders_${new Date().getTime()}.xlsx`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    ElMessage.success('导出成功')
+  } catch (error) {
+    ElMessage.error('导出失败，请重试')
+  } finally {
+    exportLoading.value = false
+  }
 }
 
 onMounted(() => {

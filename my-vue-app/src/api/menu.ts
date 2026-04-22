@@ -57,3 +57,15 @@ export function getAdminMenuPage(params: {
         params
     })
 }
+
+export const exportMenus = (params?: {
+    name?: string
+    category?: string
+    status?: number
+}) => {
+    return request({
+        url: '/menu/export',
+        params,
+        responseType: 'blob'
+    })
+}

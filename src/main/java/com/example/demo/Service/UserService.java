@@ -1,5 +1,6 @@
 package com.example.demo.Service;
 
+import com.example.demo.DTO.UserExportDTO;
 import com.example.demo.Entity.User;
 import com.example.demo.Enums.UserRole;
 import com.example.demo.Repository.UserRepository;
@@ -16,8 +17,10 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -92,5 +95,30 @@ public class UserService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
         return userRepository.findAll(spec, pageable);
+    }
+
+
+    // UserService.java
+    public List<UserExportDTO> getUsersForExport(String username) {
+        Specification<User> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            // 只导出普通用户（可选，如果只想导 USER）
+            predicates.add(cb.equal(root.get("role"), "USER"));
+            if (StringUtils.hasText(username)) {
+                predicates.add(cb.like(root.get("username"), "%" + username + "%"));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        List<User> users = userRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "createTime"));
+        return users.stream().map(this::convertToExportDTO).collect(Collectors.toList());
+    }
+
+    private UserExportDTO convertToExportDTO(User user) {
+        UserExportDTO dto = new UserExportDTO();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setRole(user.getRole());
+        dto.setCreateTime(user.getCreateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        return dto;
     }
 }

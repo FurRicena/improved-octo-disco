@@ -2,14 +2,19 @@ package com.example.demo.Controller;
 
 import com.example.demo.Annotation.Log;
 import com.example.demo.Common.Result;
+import com.example.demo.DTO.MenuExportDTO;
 import com.example.demo.Entity.Menu;
 import com.example.demo.Service.MenuService;
+import com.example.demo.Utils.ExcelExporter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 @Tag(name = "菜品接口")
@@ -77,5 +82,34 @@ public class MenuController {
     ) {
         Page<Menu> page = menuService.getAdminMenuPage(name, category, status, pageNum, pageSize);
         return Result.success(page);
+    }
+
+    @GetMapping("/export")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public void exportMenus(@RequestParam(required = false) String name,
+                            @RequestParam(required = false) String category,
+                            @RequestParam(required = false) Integer status,
+                            HttpServletResponse response) {
+        try {
+            System.out.println("导出菜品参数：name=" + name + ", category=" + category + ", status=" + status);
+            List<MenuExportDTO> exportData = menuService.getMenusForExport(name, category, status);
+
+            String[] fieldNames = {"id", "name", "category", "price", "statusText", "createTime"};
+            String[] columnHeaders = {"菜品ID", "菜品名称", "类别", "价格(元)", "状态", "创建时间"};
+
+            ExcelExporter.exportToExcel(exportData, "Menus", columnHeaders, fieldNames, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.reset();
+            response.setContentType("application/json;charset=UTF-8");
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            String errorJson = String.format("{\"code\":500,\"msg\":\"导出失败: %s\"}", e.getMessage());
+            try (PrintWriter writer = response.getWriter()) {
+                writer.write(errorJson);
+                writer.flush();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }
     }
 }

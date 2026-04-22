@@ -2,19 +2,24 @@ package com.example.demo.Controller;
 
 import com.example.demo.Annotation.Log;
 import com.example.demo.Common.Result;
+import com.example.demo.DTO.OrderExportDTO;
 import com.example.demo.DTO.Request.OrderRequest;
 import com.example.demo.DTO.Responce.AdminOrderResponse;
 import com.example.demo.DTO.Responce.OrderResponse;
 import com.example.demo.Entity.Orders;
 import com.example.demo.Enums.OrderStatus;
 import com.example.demo.Service.OrderService;
+import com.example.demo.Utils.ExcelExporter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 @Tag(name = "订单接口")
@@ -98,5 +103,43 @@ public class OrderController {
             return dto;
         });
         return Result.success(dtoPage);
+    }
+
+    @GetMapping("/export")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public void exportOrders(@RequestParam(required = false) String username,
+                             @RequestParam(required = false) String status,
+                             HttpServletResponse response) {
+        try {
+            System.out.println("导出订单参数：username=" + username + ", status=" + status);
+            // 获取数据（不分页，获取全部符合条件的订单）
+            List<OrderExportDTO> exportData = orderService.getOrdersForExport(username, status);
+
+            // 定义导出字段和列头
+            String[] fieldNames = {"id", "username", "totalPrice", "statusText", "createTime"};
+            String[] columnHeaders = {"订单ID", "用户名", "总金额(元)", "状态", "下单时间"};
+
+            ExcelExporter.exportToExcel(exportData, "Orders", columnHeaders, fieldNames, response);
+        }catch (Exception e){
+            // 打印完整的错误堆栈到控制台（关键步骤）
+            e.printStackTrace();  // 或者 System.err.println("导出失败: " + e.getMessage()); e.printStackTrace();
+
+            // 重置 response（清除可能已写入的内容）
+            response.reset();
+            // 设置响应类型为 JSON
+            response.setContentType("application/json;charset=UTF-8");
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); // 500
+
+            // 构造 JSON 错误信息
+            String errorJson = String.format("{\"code\":500,\"msg\":\"导出失败: %s\"}", e.getMessage());
+            try (PrintWriter writer = response.getWriter()) {
+                writer.write(errorJson);
+                writer.flush();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }
+
+
     }
 }

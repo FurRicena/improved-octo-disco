@@ -1,5 +1,6 @@
 package com.example.demo.Service;
 
+import com.example.demo.DTO.OrderExportDTO;
 import com.example.demo.DTO.Request.OrderRequest;
 import com.example.demo.DTO.Responce.OrderResponse;
 import com.example.demo.Entity.Menu;
@@ -24,8 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -210,5 +213,44 @@ public class OrderService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
         return ordersRepository.findAll(spec, pageable);
+    }
+
+    public List<OrderExportDTO> getOrdersForExport(String username, String status) {
+        // 复用之前的查询逻辑（不分页）
+        Specification<Orders> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (StringUtils.hasText(username)) {
+                Join<Orders, User> userJoin = root.join("user");
+                predicates.add(cb.like(userJoin.get("username"), "%" + username + "%"));
+            }
+
+            // 不能调用name方法
+            if (status != null){
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        List<Orders> orders = ordersRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "createTime"));
+        return orders.stream().map(this::convertToExportDTO).collect(Collectors.toList());
+    }
+
+    private OrderExportDTO convertToExportDTO(Orders order) {
+        OrderExportDTO dto = new OrderExportDTO();
+        dto.setId(order.getId());
+        dto.setUsername(order.getUser().getUsername());
+        dto.setTotalPrice(order.getTotalPrice());
+        dto.setStatusText(convertStatus(order.getStatus()));
+        dto.setCreateTime(order.getCreateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        return dto;
+    }
+
+    private String convertStatus(OrderStatus status) {
+        return switch (status) {
+            case PENDING -> "待接单";
+            case ACCEPTED -> "已接单";
+            case COOKING -> "制作中";
+            case FINISHED -> "已完成";
+            case CANCELLED -> "已取消";
+        };
     }
 }

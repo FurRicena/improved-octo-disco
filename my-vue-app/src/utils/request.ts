@@ -10,8 +10,14 @@ const request = axios.create({
 // 响应拦截器（TS写法）
 request.interceptors.response.use(
     (res: AxiosResponse) => {
+
+        // 判断是否为blob型请求
+        if (res.config.responseType === 'blob') {
+            return res;
+        }
+
         if(res.data.code !== 200){
-            ElMessage.error(res.data.msg || "请求失败")
+            ElMessage.error(res.data.msg || "拦截器处统一失败")
             return Promise.reject(new Error(res.data.message))
         }
         if (res.data.code === 401 || res.data.code === 403) {
