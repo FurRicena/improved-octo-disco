@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Annotation.Log;
 import com.example.demo.Common.Result;
 import com.example.demo.Service.FileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +27,7 @@ public class UploadController {
 
     @Operation(summary = "上传文件")
     @PostMapping
+    @Log("上传文件")
     public Result<?> upload(@RequestParam("file") MultipartFile file) throws Exception {
         return Result.success(fileService.upload(file));
     }

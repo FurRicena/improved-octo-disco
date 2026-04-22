@@ -1,9 +1,11 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Annotation.Log;
 import com.example.demo.Common.Result;
 import com.example.demo.DTO.DashboardData;
 import com.example.demo.DTO.MenuSales;
 import com.example.demo.Service.StatisticsService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,11 +26,13 @@ public class StatisticsController {
         this.statisticsService = statisticsService;
     }
 
+    @Operation(summary = "查询销售量")
     @GetMapping("/menu-sales")
     public Result<List<MenuSales>> getMenuSales() {
         return Result.success(statisticsService.getMenuSalesStatistics());
     }
 
+    @Operation(summary = "查看仪表盘")
     @GetMapping("/dashboard")
     public Result<DashboardData> getDashboardData() {
         DashboardData data = new DashboardData();

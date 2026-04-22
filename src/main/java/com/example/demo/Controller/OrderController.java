@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Annotation.Log;
 import com.example.demo.Common.Result;
 import com.example.demo.DTO.Request.OrderRequest;
 import com.example.demo.DTO.Responce.AdminOrderResponse;
@@ -31,6 +32,7 @@ public class OrderController {
 
     @Operation(summary = "创建订单")
     @PostMapping
+    @Log("创建订单")
     public Result<Orders> create(@RequestBody OrderRequest request){
         return Result.success(orderService.createOrder(request));
     }
@@ -64,6 +66,7 @@ public class OrderController {
     @Operation(summary = "更新订单状态")
     @PutMapping("/{id}/status")
     @PreAuthorize("hasAuthority('ADMIN')")
+    @Log("更新订单状态")
     public Result<Orders> updateStatus(@PathVariable Long id,
                                        @RequestParam OrderStatus status){
         return Result.success(orderService.updateOrderStatus(id, status));
@@ -80,7 +83,6 @@ public class OrderController {
     @Operation(summary = "分页查询所有订单")
     @GetMapping("/adminpage")
     @PreAuthorize("hasAuthority('ADMIN')")
-//    @PreAuthorize("hasRole('ADMIN')")
     public Result<Page<AdminOrderResponse>> getAdminOrdersPage(
             @RequestParam(required = false) String username,
             @RequestParam(required = false) OrderStatus status,

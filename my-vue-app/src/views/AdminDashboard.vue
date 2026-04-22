@@ -122,7 +122,7 @@ const renderCharts = () => {
   trendChart = echarts.init(trendChartRef.value)
   const dates = dashboardData.value.last7DaysTrend.map(item => item.date)
   const orderCounts = dashboardData.value.last7DaysTrend.map(item => item.orderCount)
-  const sales = dashboardData.value.last7DaysTrend.map(item => item.sales)
+  const sales = dashboardData.value.last7DaysTrend.map(item => item.totalAmount)
   trendChart.setOption({
     tooltip: { trigger: 'axis' },
     legend: { data: ['订单数量', '销售额(元)'] },

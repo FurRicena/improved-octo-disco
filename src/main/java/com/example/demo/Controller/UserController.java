@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Annotation.Log;
 import com.example.demo.Common.Result;
 import com.example.demo.DTO.Responce.JwtResponse;
 import com.example.demo.Entity.User;
@@ -36,12 +37,14 @@ public class UserController {
 
     @Operation(summary = "用户注册")
     @PostMapping("/register")
+    @Log("用户注册")
     public Result<User> register(@RequestBody User user){
         return Result.success(userService.register(user));
     }
 
     @Operation(summary = "用户登录")
     @PostMapping("/login")
+    @Log("用户登录")
     public Result<?> login(@RequestBody User user){
         //return Result.success(userService.login(user.getUsername(),user.getPassword()));
 //        User u = userService.login(user.getUsername(), user.getPassword());
@@ -78,6 +81,7 @@ public class UserController {
     @Operation(summary = "按id修改用户")
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
+    @Log("按id修改用户")
     public Result<User> update(@PathVariable Long id,@RequestBody User user){
         return Result.success(userService.update(id, user));
     }
@@ -85,11 +89,13 @@ public class UserController {
     @Operation(summary = "按id删除用户")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
+    @Log("按id删除用户")
     public Result<?> delete(@PathVariable Long id) {
         userService.delete(id);
         return Result.success(null);
     }
 
+    @Operation(summary = "分页查看所有用户")
     @GetMapping("/page")
     @PreAuthorize("hasAuthority('ADMIN')")
     public Result<Page<User>> getAdminUserPage(

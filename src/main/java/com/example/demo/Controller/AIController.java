@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Annotation.Log;
 import com.example.demo.Common.Result;
 import com.example.demo.Entity.Menu;
 import com.example.demo.Repository.MenuRepository;
@@ -26,6 +27,7 @@ public class AIController {
     }
 
     @PostMapping("/recommend")
+    @Log("向AI提问")
     public Result<List<Menu>> aiRecommend(@RequestBody Map<String, String> request) {
         String userMessage = request.get("message");
         // 1. AI 解析用户意图

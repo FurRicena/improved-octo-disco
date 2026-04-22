@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Annotation.Log;
 import com.example.demo.Common.Result;
 import com.example.demo.Entity.Menu;
 import com.example.demo.Service.MenuService;
@@ -25,6 +26,7 @@ public class MenuController {
     @Operation(summary = "新增菜品")
     @PostMapping("/addMenu")
     @PreAuthorize("hasAuthority('ADMIN')")
+    @Log("新增菜品")
     public Result<Menu> addMenu(@RequestBody Menu menu){
         return Result.success(menuService.addMenu(menu));
     }
@@ -32,6 +34,7 @@ public class MenuController {
     @Operation(summary = "修改菜品")
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
+    @Log("修改菜品")
     public Result<Menu> updateMenu(@PathVariable Long id, @RequestBody Menu menu){
         return Result.success(menuService.updateMenu(id, menu));
     }
@@ -39,6 +42,7 @@ public class MenuController {
     @Operation(summary = "删除菜品")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
+    @Log("删除菜品")
     public Result<?> deleteMenu(@PathVariable Long id){
         menuService.deleteMenu(id);
         return Result.success(null);
@@ -64,7 +68,6 @@ public class MenuController {
 
     @Operation(summary = "分页查询")
     @GetMapping("/page")
-//    @PreAuthorize("hasRole('ADMIN')")
     public Result<Page<Menu>> getAdminMenuPage(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String category,

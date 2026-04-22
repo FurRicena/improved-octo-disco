@@ -19,7 +19,7 @@ public interface OrdersRepository extends JpaRepository<Orders, Long>, JpaSpecif
     BigDecimal sumTotalPriceByStatus(@Param("status") OrderStatus status);
 
     @Query("SELECT FUNCTION('DATE', o.createTime) as date, COUNT(o), COALESCE(SUM(o.totalPrice), 0) " +
-            "FROM Orders o WHERE o.createTime >= :startDate GROUP BY FUNCTION('DATE', o.createTime) ORDER BY date")
+            "FROM Orders o WHERE o.createTime >= :startDate GROUP BY FUNCTION('DATE', o.createTime) ORDER BY 1")
     List<Object[]> getLast7DaysOrderTrend(@Param("startDate") LocalDateTime startDate);
 
     @Query("SELECT o.status, COUNT(o) FROM Orders o GROUP BY o.status")

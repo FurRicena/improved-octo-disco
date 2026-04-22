@@ -40,6 +40,12 @@ const routes = [
                 name: 'AdminDashboard',
                 component: () => import('@/views/AdminDashboard.vue'),
                 meta: { requiresAuth: true, roles: ['ADMIN'] }
+            },
+            {
+                path: '/admin/logs',
+                name: 'AdminLogs',
+                component: () => import('@/views/AdminLogs.vue'),
+                meta: { requiresAuth: true, roles: ['ADMIN'] }
             }
         ]
     },
