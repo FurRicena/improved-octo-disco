@@ -47,6 +47,14 @@ public class OrderService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * 创建订单（包含订单主表和明细表）
+     * 注意：该方法使用事务，任何步骤失败都会回滚
+     *
+     * @param request 订单请求对象，包含用户ID及菜品列表（每个菜品有ID和数量）
+     * @return 创建成功后的订单对象（状态为 PENDING）
+     * @throws RuntimeException 如果菜品不存在、用户未登录或库存不足（示例未实现库存校验）
+     */
     @Schema(description = "创建订单")
     @Transactional // 非常关键🔥
     public Orders createOrder(OrderRequest request) {
@@ -88,11 +96,27 @@ public class OrderService {
 
         return orders;
     }
+
+    /**
+     * 根据用户ID查询该用户的所有订单（不分页）
+     *
+     * @param userId 用户ID
+     * @return 订单列表，按创建时间降序（需要在Repository中定义排序）
+     */
     @Schema(description = "查询用户订单")
         public List<Orders> getOrdersByUserId(Long userId){
         return ordersRepository.findByUserId(userId);
     }
 
+    /**
+     * 分页查询指定用户的订单，支持按订单状态过滤
+     *
+     * @param userId   用户ID
+     * @param pageNum  页码（从1开始，默认1）
+     * @param pageSize 每页条数（默认10，最大100）
+     * @param status   订单状态（可选，例如 "PENDING"、"FINISHED"）
+     * @return 分页后的订单数据，按ID升序排列
+     */
     @Schema(description = "查询用户订单(分页)")
     public Page<Orders> getUserOrdersByPage(Long userId, Integer pageNum, Integer pageSize, String status) {
         // 1. 参数默认值处理
@@ -117,8 +141,13 @@ public class OrderService {
         return ordersRepository.findAll(spec, pageable);
     }
 
-
-
+    /**
+     * 查询订单详情，包含订单主信息及所有明细项（菜品名称、单价、数量等）
+     *
+     * @param orderId 订单ID
+     * @return 订单详情响应对象，包含订单信息和菜品明细列表
+     * @throws RuntimeException 如果订单不存在，或明细关联的菜品不存在（理论上不会发生）
+     */
     @Schema(description = "查询订单详情")
     public OrderResponse getOrderDetail(Long orderId){
         Orders orders = ordersRepository.findById(orderId)
@@ -151,6 +180,16 @@ public class OrderService {
         return orderResponse;
     }
 
+    /**
+     * 更新订单状态，包含严格的状态流转校验
+     * 支持流转路径：PENDING → ACCEPTED → COOKING → FINISHED
+     * 取消：PENDING/ACCEPTED/COOKING → CANCELLED
+     *
+     * @param orderId   订单ID
+     * @param newStatus 目标订单状态
+     * @return 更新后的订单对象
+     * @throws RuntimeException 如果订单不存在，或状态流转非法
+     */
     @Schema(description = "更新订单状态")
     @Transactional
     public Orders updateOrderStatus(Long orderId, OrderStatus newStatus){
@@ -188,11 +227,25 @@ public class OrderService {
         return ordersRepository.save(order);
     }
 
+    /**
+     * 查询所有订单（不分页，慎用于大量数据）
+     *
+     * @return 全部订单列表
+     */
     @Schema(description = "查询全部订单")
     public List<Orders> getAllOrders(){
         return ordersRepository.findAll();
     }
 
+    /**
+     * 后台管理：分页查询订单，支持按用户名模糊搜索和订单状态过滤
+     *
+     * @param username 用户名（模糊匹配，可选）
+     * @param status   订单状态（精确匹配，可选）
+     * @param pageNum  页码（从1开始，默认1）
+     * @param pageSize 每页条数（默认10，最大100）
+     * @return 分页后的订单数据，按创建时间降序排列
+     */
     @Schema(description = "查询全部订单(分页)")
     public Page<Orders> getAdminOrdersPage(String username, OrderStatus status, Integer pageNum, Integer pageSize) {
         int currentPage = (pageNum == null || pageNum < 1) ? 1 : pageNum;
@@ -215,6 +268,14 @@ public class OrderService {
         return ordersRepository.findAll(spec, pageable);
     }
 
+    /**
+     * 导出符合条件的订单数据（用于Excel等导出功能）
+     *
+     * @param username 用户名（模糊匹配，可选）
+     * @param status   订单状态字符串（可选，如 "FINISHED"）
+     * @return 订单导出DTO列表，包含用户名、状态文本、格式化时间等
+     */
+    @Schema(description = "导出订单")
     public List<OrderExportDTO> getOrdersForExport(String username, String status) {
         // 复用之前的查询逻辑（不分页）
         Specification<Orders> spec = (root, query, cb) -> {
@@ -234,6 +295,12 @@ public class OrderService {
         return orders.stream().map(this::convertToExportDTO).collect(Collectors.toList());
     }
 
+    /**
+     * 将订单实体转换为导出用的DTO
+     *
+     * @param order 订单实体（必须包含关联的User对象）
+     * @return 订单导出DTO，包含用户名、状态中文描述、格式化创建时间
+     */
     private OrderExportDTO convertToExportDTO(Orders order) {
         OrderExportDTO dto = new OrderExportDTO();
         dto.setId(order.getId());
@@ -244,6 +311,12 @@ public class OrderService {
         return dto;
     }
 
+    /**
+     * 将订单状态枚举转换为中文描述字符串
+     *
+     * @param status 订单状态枚举
+     * @return 中文状态描述（待接单、已接单、制作中、已完成、已取消）
+     */
     private String convertStatus(OrderStatus status) {
         return switch (status) {
             case PENDING -> "待接单";

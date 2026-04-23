@@ -63,9 +63,9 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {ElMessage, ElMessageBox} from 'element-plus'
 // import { ElMessageBox} from "element-plus";
-import {getOrderDetail, updateOrderStatus} from '@/api/orders'
+import {getOrderDetail, updateOrderStatus} from '@/api/orders.ts'
 // import { cancelOrder as cancelOrderApi } from '@/api/orders'
-import type { Orders } from '@/types/Orders'
+import type { Orders } from '@/types/Orders.ts'
 
 const route = useRoute()
 const router = useRouter()

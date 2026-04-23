@@ -88,8 +88,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {exportOrders, getAdminOrdersPage, updateOrderStatus} from '@/api/orders'
-import type { Orders } from '@/types/Orders'
+import {exportOrders, getAdminOrdersPage, updateOrderStatus} from '@/api/orders.ts'
+import type { Orders } from '@/types/Orders.ts'
 
 // 扩展订单类型，添加用户名
 interface AdminOrder extends Orders {

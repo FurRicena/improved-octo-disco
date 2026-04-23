@@ -7,6 +7,7 @@ import com.example.demo.Entity.User;
 import com.example.demo.Repository.CommentRepository;
 import com.example.demo.Repository.MenuRepository;
 import com.example.demo.Repository.UserRepository;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +30,18 @@ public class CommentService {
         this.menuRepository = menuRepository;
     }
 
-    // 用户发表评论
+    /**
+     * 用户发表评论（包含评分和内容）
+     * <p>评论初始状态为可见（status=1），创建时间为当前时间</p>
+     *
+     * @param userId  评论用户ID
+     * @param menuId  被评论的菜品ID
+     * @param rating  评分（通常1-5分）
+     * @param content 评论内容
+     * @return 评论DTO（包含用户名和菜品名）
+     * @throws RuntimeException 如果用户或菜品不存在
+     */
+    @Schema(description = "用户发表评论")
     @Transactional
     public CommentDTO addComment(Long userId, Long menuId, Integer rating, String content) {
         userRepository.findById(userId).orElseThrow(() -> new RuntimeException("用户不存在"));
@@ -47,28 +59,57 @@ public class CommentService {
         return convertToDTO(comment);
     }
 
-    // 获取菜品的评论（分页，只显示可见的）
+    /**
+     * 获取指定菜品的评论（分页，仅返回状态为可见的评论）
+     *
+     * @param menuId 菜品ID
+     * @param page   页码（从1开始）
+     * @param size   每页条数
+     * @return 分页的评论DTO数据，按创建时间降序排列
+     */
+    @Schema(description = "获取菜品的评论（分页，只显示可见的）")
     public Page<CommentDTO> getCommentsByMenu(Long menuId, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createTime"));
         Page<Comment> commentPage = commentRepository.findByMenuId(menuId, pageable);
         return commentPage.map(this::convertToDTO);
     }
 
-    // 获取菜品平均评分
+    /**
+     * 获取菜品的平均评分
+     *
+     * @param menuId 菜品ID
+     * @return 平均评分（保留小数），若无评论则返回0.0
+     */
+    @Schema(description = "获取菜品平均评分")
     public Double getAverageRating(Long menuId) {
         Double avg = commentRepository.getAverageRatingByMenuId(menuId);
         return avg != null ? avg : 0.0;
     }
 
-    // 管理员获取所有评论（分页，包括隐藏的）
+    /**
+     * 管理员查询所有评论（包含已隐藏的评论），分页返回
+     *
+     * @param page 页码（从1开始）
+     * @param size 每页条数
+     * @return 分页的评论DTO数据，按创建时间降序排列
+     */
+    @Schema(description = "获取所有评论")
     public Page<CommentDTO> getAllCommentsForAdmin(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createTime"));
         Page<Comment> commentPage = commentRepository.findAll(pageable);
         return commentPage.map(this::convertToDTO);
     }
 
-    // 管理员修改评论状态（显示/隐藏）
+    /**
+     * 管理员修改评论状态（显示/隐藏）
+     *
+     * @param commentId 评论ID
+     * @param status    状态值（1-可见，0-隐藏）
+     * @return 更新后的评论实体
+     * @throws RuntimeException 如果评论不存在
+     */
     @Transactional
+    @Schema(description = "修改评论状态（显示/隐藏）")
     public Comment updateCommentStatus(Long commentId, Integer status) {
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new RuntimeException("评论不存在"));
         comment.setStatus(status);
@@ -76,13 +117,24 @@ public class CommentService {
         return comment;
     }
 
-    // 管理员删除评论
+    /**
+     * 管理员删除评论（物理删除）
+     *
+     * @param commentId 评论ID
+     */
     @Transactional
+    @Schema(description = "删除评论")
     public void deleteComment(Long commentId) {
         commentRepository.deleteById(commentId);
     }
 
-    // 转换实体到DTO，填充用户名和菜品名
+    /**
+     * 将评论实体转换为评论DTO，并填充用户名和菜品名称
+     * <p><b>性能提示：</b>该方法内逐个查询用户和菜品，在批量转换时可能存在N+1问题，建议优化为批量查询或使用@EntityGraph</p>
+     *
+     * @param comment 评论实体
+     * @return 包含用户名和菜品名的评论DTO
+     */
     private CommentDTO convertToDTO(Comment comment) {
         CommentDTO dto = new CommentDTO();
         dto.setId(comment.getId());

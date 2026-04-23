@@ -35,6 +35,11 @@ public class StatisticsService {
         this.ordersRepository = ordersRepository;
     }
 
+    /**
+     * 统计所有菜品的销售数量（按订单项汇总）
+     *
+     * @return 菜品销售统计列表，包含菜单ID、名称、单价和总销量
+     */
     @Schema(description = "统计销量")
     public List<MenuSales> getMenuSalesStatistics() {
         List<Object[]> results = orderItemRepository.getMenuSalesStatistics();
@@ -55,22 +60,42 @@ public class StatisticsService {
         return list;
     }
 
-    // 总用户数（只统计 USER 角色）
+    /**
+     * 获取普通用户（角色为 USER）的总数量
+     *
+     * @return 普通用户总数
+     */
+    @Schema(description = "获取用户总数")
     public long getTotalUserCount() {
         return userRepository.countByRole(UserRole.USER);
     }
 
-    // 总订单数
+    /**
+     * 获取订单总数
+     *
+     * @return 订单总数量（包含所有状态）
+     */
+    @Schema(description = "获取订单总数")
     public long getTotalOrderCount() {
         return ordersRepository.count();
     }
 
-    // 总销售额（已完成订单的 totalPrice 之和）
+    /**
+     * 获取已完成订单的总销售额
+     *
+     * @return 已完成订单的销售额总和
+     */
+    @Schema(description = "获取总销售额（已完成）")
     public BigDecimal getTotalSales() {
         return ordersRepository.sumTotalPriceByStatus(OrderStatus.FINISHED);
     }
 
-    // 近7天订单趋势
+    /**
+     * 获取近7天的订单趋势（每日订单数量及销售额）
+     *
+     * @return 包含近7天每日订单数及总金额的列表，按日期升序排列
+     */
+    @Schema(description = "获取近7天的订单趋势（每日订单数量及销售额）")
     public List<DailyOrderTrend> getLast7DaysOrderTrend() {
         List<Object[]> results = ordersRepository.getLast7DaysOrderTrend(LocalDateTime.now().minusDays(7).toLocalDate().atStartOfDay());
         // 转换为 DTO
@@ -85,7 +110,12 @@ public class StatisticsService {
         return trendList;
     }
 
-    // 热门菜品TOP5
+    /**
+     * 获取销量最高的前5个菜品（热门菜品TOP5）
+     *
+     * @return 按销量降序排列的前5个菜品销售统计
+     */
+    @Schema(description = "获取销量最高的前5个菜品")
     public List<MenuSales> getTop5MenuSales() {
         List<Object[]> results = orderItemRepository.getTop5MenuSales();
         List<MenuSales> menuSales = new ArrayList<>();
@@ -105,7 +135,12 @@ public class StatisticsService {
         return menuSales;
     }
 
-    // 订单状态分布
+    /**
+     * 统计订单状态分布（各状态对应的订单数量）
+     *
+     * @return Map，键为订单状态名称（如 "PENDING", "FINISHED"），值为对应订单数量
+     */
+    @Schema(description = "统计订单状态分布")
     public Map<String, Long> getOrderStatusDistribution() {
         List<Object[]> results = ordersRepository.getOrderStatusDistribution();
         Map<String, Long> distribution = new HashMap<>();

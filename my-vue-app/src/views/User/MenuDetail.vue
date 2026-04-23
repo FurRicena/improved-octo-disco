@@ -109,12 +109,12 @@
 import {ref, onMounted, computed, watch} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { useCartStore } from '@/stores/cart'
-import { useUserStore } from '@/stores/user'
-import { getMenuById } from '@/api/menu'
-import { getCommentsByMenu, addComment, getAverageRating} from '@/api/comment'
-import type { Menu } from '@/types/Menu'
-import type { Comment } from '@/types/Comment'
+import { useCartStore } from '@/stores/cart.ts'
+import { useUserStore } from '@/stores/user.ts'
+import { getMenuById } from '@/api/menu.ts'
+import { getCommentsByMenu, addComment, getAverageRating} from '@/api/comment.ts'
+import type { Menu } from '@/types/Menu.ts'
+import type { Comment } from '@/types/Comment.ts'
 
 const route = useRoute()
 const router = useRouter()

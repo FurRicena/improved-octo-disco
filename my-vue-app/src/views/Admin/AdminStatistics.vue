@@ -22,7 +22,7 @@
 import { ref, onMounted, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
-import { getMenuSales, type MenuSales } from '@/api/statistics'
+import { getMenuSales, type MenuSales } from '@/api/statistics.ts'
 // import * as THREE from 'three'
 
 const loading = ref(false)

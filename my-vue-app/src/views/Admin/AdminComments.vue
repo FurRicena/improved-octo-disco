@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getAdminComments, updateCommentStatus, deleteComment } from '@/api/comment'
+import { getAdminComments, updateCommentStatus, deleteComment } from '@/api/comment.ts'
 import type { Comment } from "@/types/Comment.ts";
 
 const comments = ref<Comment[]>([])

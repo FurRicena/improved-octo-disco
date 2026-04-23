@@ -26,12 +26,26 @@ public class MenuService {
         this.menuRepository = menuRepository;
     }
 
+    /**
+     * 添加新菜品（默认状态为上架，status=1）
+     *
+     * @param menu 菜品实体（需包含名称、价格、分类等信息，id由数据库自动生成）
+     * @return 保存后的菜品对象（包含生成的id和创建时间）
+     */
     @Schema(description = "添加菜品")
     public Menu addMenu(Menu menu){
         menu.setStatus(1);
         return menuRepository.save(menu);
     }
 
+    /**
+     * 修改菜品信息（仅更新传入的非空字段）
+     *
+     * @param id   菜品ID
+     * @param menu 包含待修改字段的菜品对象（支持名称、价格、分类、描述、图片、状态）
+     * @return 修改后的菜品对象
+     * @throws RuntimeException 如果指定ID的菜品不存在
+     */
     @Schema(description = "修改菜品")
     public Menu updateMenu(Long id, Menu menu) {
         Menu exist = menuRepository.findById(id)
@@ -45,6 +59,12 @@ public class MenuService {
         return menuRepository.save(exist);
     }
 
+    /**
+     * 根据ID删除菜品（物理删除）
+     *
+     * @param id 菜品ID
+     * @throws RuntimeException 如果菜品不存在
+     */
     @Schema(description = "删除菜品")
     public void deleteMenu(Long id) {
         if(!menuRepository.existsById(id)) {
@@ -53,23 +73,50 @@ public class MenuService {
         menuRepository.deleteById(id);
     }
 
+    /**
+     * 查询单个菜品详情
+     *
+     * @param id 菜品ID
+     * @return 菜品实体对象
+     * @throws RuntimeException 如果菜品不存在
+     */
     @Schema(description = "查询单个菜品")
     public Menu getMenu(Long id) {
         return menuRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("菜品不存在"));
     }
 
+    /**
+     * 查询所有上架菜品（status=1）
+     *
+     * @return 上架菜品列表，按创建时间或其他默认排序（由Repository定义）
+     */
     @Schema(description = "查询全部上架菜品")
     public List<Menu> getAllAvailable() {
         return menuRepository.findByStatus(1);
     }
 
+    /**
+     * 根据分类查询该分类下的所有上架菜品
+     *
+     * @param category 菜品分类（如 "主食"、"饮品"）
+     * @return 该分类下状态为上架的菜品列表
+     */
     @Schema(description = "按分类查询上架菜品")
     public List<Menu> getByCategory(String category) {
         return menuRepository.findByCategoryAndStatus(category, 1);
     }
 
-    // 分页查询
+    /**
+     * 后台管理：分页查询菜品，支持按名称模糊搜索、分类精确匹配、状态筛选
+     *
+     * @param name     菜品名称（模糊匹配，可选）
+     * @param category 菜品分类（精确匹配，可选）
+     * @param status   状态（1上架/0下架，可选）
+     * @param pageNum  页码（从1开始，默认1）
+     * @param pageSize 每页条数（默认10，最大100）
+     * @return 分页后的菜品数据，按ID升序排列
+     */
     @Schema(description = "分页查询")
     public Page<Menu> getAdminMenuPage(String name, String category, Integer status, Integer pageNum, Integer pageSize) {
         int currentPage = (pageNum == null || pageNum < 1) ? 1 : pageNum;
@@ -92,8 +139,15 @@ public class MenuService {
         return menuRepository.findAll(spec, pageable);
     }
 
-
-    // MenuService.java
+    /**
+     * 导出符合条件的菜品数据（用于Excel等导出功能）
+     *
+     * @param name     菜品名称（模糊匹配，可选）
+     * @param category 菜品分类（精确匹配，可选）
+     * @param status   状态（1上架/0下架，可选）
+     * @return 菜品导出DTO列表，包含状态文本（上架/下架）和格式化创建时间
+     */
+    @Schema(description = "导出菜单")
     public List<MenuExportDTO> getMenusForExport(String name, String category, Integer status) {
         // 复用已有的查询逻辑（不分页）
         Specification<Menu> spec = (root, query, cb) -> {
@@ -113,6 +167,12 @@ public class MenuService {
         return menus.stream().map(this::convertToExportDTO).collect(Collectors.toList());
     }
 
+    /**
+     * 将菜品实体转换为导出用的DTO
+     *
+     * @param menu 菜品实体
+     * @return 菜品导出DTO，包含状态中文描述（上架/下架）和格式化创建时间
+     */
     private MenuExportDTO convertToExportDTO(Menu menu) {
         MenuExportDTO dto = new MenuExportDTO();
         dto.setId(menu.getId());

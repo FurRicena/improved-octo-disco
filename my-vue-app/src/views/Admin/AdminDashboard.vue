@@ -75,7 +75,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import * as echarts from 'echarts'
-import { getDashboardData, type DashboardData } from '@/api/statistics'
+import { getDashboardData, type DashboardData } from '@/api/statistics.ts'
 import { ElMessage } from 'element-plus'
 import { User, ShoppingCart, Money, TrendCharts } from '@element-plus/icons-vue'
 

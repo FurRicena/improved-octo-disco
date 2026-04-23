@@ -115,7 +115,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {getAdminUserPage, updateUser, deleteUser, register, exportUsers} from '@/api/user'
+import {getAdminUserPage, updateUser, deleteUser, register, exportUsers} from '@/api/user.ts'
 import { getOrderDetail, getUserOrders } from "@/api/orders.ts"
 import type { User } from "@/types/User.ts"
 import type { Orders } from "@/types/Orders.ts"

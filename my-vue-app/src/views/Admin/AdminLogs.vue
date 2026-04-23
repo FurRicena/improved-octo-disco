@@ -49,7 +49,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getLogs, type LogQueryParams } from '@/api/log'
+import { getLogs, type LogQueryParams } from '@/api/log.ts'
 import type { Log } from '@/api/log.ts'
 
 // 搜索表单（参照 Menu 的 searchForm）

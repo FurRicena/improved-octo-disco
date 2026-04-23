@@ -61,9 +61,9 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getUserOrdersPage } from '@/api/orders'
-import { useUserStore } from '@/stores/user'
-import type { Orders } from '@/types/Orders'
+import { getUserOrdersPage } from '@/api/orders.ts'
+import { useUserStore } from '@/stores/user.ts'
+import type { Orders } from '@/types/Orders.ts'
 
 const router = useRouter()
 const userStore = useUserStore()

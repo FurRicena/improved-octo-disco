@@ -12,7 +12,6 @@ import com.example.demo.Utils.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,6 +41,12 @@ public class UserController {
     }
 
 
+    /**
+     * 用户注册
+     *
+     * @param user 用户注册信息（用户名、密码、角色等，密码为明文）
+     * @return 包含注册成功用户对象的统一响应结果
+     */
     @Operation(summary = "用户注册")
     @PostMapping("/register")
     @Log("用户注册")
@@ -49,14 +54,17 @@ public class UserController {
         return Result.success(userService.register(user));
     }
 
+    /**
+     * 用户登录（使用 JWT 认证）
+     * <p>验证用户名密码，认证通过后生成并返回 JWT Token，同时返回用户基本信息。</p>
+     *
+     * @param user 包含用户名和明文密码的请求体
+     * @return 包含 JWT Token 及用户信息的统一响应结果（密码不返回）
+     */
     @Operation(summary = "用户登录")
     @PostMapping("/login")
     @Log("用户登录")
     public Result<?> login(@RequestBody User user){
-        //return Result.success(userService.login(user.getUsername(),user.getPassword()));
-//        User u = userService.login(user.getUsername(), user.getPassword());
-//        return Result.success(u);
-
         // 1. 用 AuthenticationManager 验证用户名密码
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -78,6 +86,11 @@ public class UserController {
         ));
     }
 
+    /**
+     * 查询所有用户（仅限管理员）
+     *
+     * @return 包含所有用户列表的统一响应结果
+     */
     @Operation(summary = "查询所有用户")
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -85,14 +98,28 @@ public class UserController {
         return Result.success(userService.getAll());
     }
 
+    /**
+     * 根据用户ID修改用户信息（仅限管理员）
+     * <p>仅修改请求体中非空字段。</p>
+     *
+     * @param id   用户ID
+     * @param user 包含待修改字段的用户对象
+     * @return 包含更新后用户对象的统一响应结果
+     */
     @Operation(summary = "按id修改用户")
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     @Log("按id修改用户")
-    public Result<User> update(@PathVariable Long id,@RequestBody User user){
+    public Result<User> update(@PathVariable Long id, @RequestBody User user){
         return Result.success(userService.update(id, user));
     }
 
+    /**
+     * 根据用户ID删除用户（仅限管理员）
+     *
+     * @param id 用户ID
+     * @return 操作成功的统一响应结果（data 为 null）
+     */
     @Operation(summary = "按id删除用户")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -102,6 +129,17 @@ public class UserController {
         return Result.success(null);
     }
 
+    /**
+     * 分页查询普通用户列表（仅限管理员）
+     * <p>支持按用户名模糊搜索和注册时间范围过滤。</p>
+     *
+     * @param username  用户名（模糊匹配，可选）
+     * @param startTime 注册开始时间（格式 yyyy-MM-dd，可选）
+     * @param endTime   注册结束时间（格式 yyyy-MM-dd，可选）
+     * @param pageNum   页码（默认1）
+     * @param pageSize  每页条数（默认10）
+     * @return 包含分页用户数据的统一响应结果
+     */
     @Operation(summary = "分页查看所有用户")
     @GetMapping("/page")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -116,7 +154,14 @@ public class UserController {
         return Result.success(page);
     }
 
-
+    /**
+     * 导出用户数据至Excel（仅限管理员）
+     * <p>支持按用户名模糊过滤，导出符合条件的全部用户（不分页）。</p>
+     * <p>导出成功时直接输出Excel文件流；失败时返回500错误及JSON格式错误信息。</p>
+     *
+     * @param username 用户名（模糊匹配，可选）
+     * @param response HTTP响应对象，用于写入导出文件或错误信息
+     */
     @GetMapping("/export")
     @PreAuthorize("hasAuthority('ADMIN')")
     public void exportUsers(@RequestParam(required = false) String username,

@@ -32,6 +32,16 @@ public class LogController {
         this.logRepository = logRepository;
     }
 
+    /**
+     * 分页查询操作日志（仅限管理员）
+     * <p>支持按操作人（operator）和操作类型（operation）进行模糊搜索，结果按创建时间降序排列。</p>
+     *
+     * @param operator 操作人用户名（模糊匹配，可选）
+     * @param operation 操作描述（模糊匹配，可选，如“用户注册”、“创建订单”）
+     * @param pageNum   页码（默认1，从1开始）
+     * @param pageSize  每页条数（默认10，最大100）
+     * @return 包含分页操作日志数据的统一响应结果
+     */
     @GetMapping("/admin/logs")
     public Result<Page<OperationLog>> getLogs(@RequestParam(required = false) String operator,
                                               @RequestParam(required = false) String operation,

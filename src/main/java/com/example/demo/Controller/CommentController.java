@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Annotation.Log;
 import com.example.demo.Common.Result;
 import com.example.demo.DTO.CommentDTO;
 import com.example.demo.DTO.Request.CommentAddRequest;
@@ -26,6 +27,7 @@ public class CommentController {
 
     // 用户发表评论（需要登录）
     @PostMapping("/add")
+    @Log("发表评论")
     public Result<CommentDTO> addComment(@RequestBody CommentAddRequest request,
                                          Authentication authentication) {
         Long userId = getUserIdFromAuth(authentication);
@@ -77,12 +79,14 @@ public class CommentController {
 
     @PutMapping("/{commentId}/status")
     @PreAuthorize("hasAuthority('ADMIN')")
+    @Log("修改评论状态")
     public Result<Comment> updateStatus(@PathVariable Long commentId, @RequestParam Integer status) {
         return Result.success(commentService.updateCommentStatus(commentId, status));
     }
 
     @DeleteMapping("/{commentId}")
     @PreAuthorize("hasAuthority('ADMIN')")
+    @Log("删除评论")
     public Result<?> deleteComment(@PathVariable Long commentId) {
         commentService.deleteComment(commentId);
         return Result.success(null);

@@ -35,6 +35,12 @@ public class OrderController {
     }
 
 
+    /**
+     * 创建订单
+     *
+     * @param request 订单请求对象（包含用户ID及菜品列表）
+     * @return 包含创建成功订单对象的统一响应结果
+     */
     @Operation(summary = "创建订单")
     @PostMapping
     @Log("创建订单")
@@ -42,14 +48,27 @@ public class OrderController {
         return Result.success(orderService.createOrder(request));
     }
 
-    // 不分页
+    /**
+     * 查询指定用户的所有订单（不分页）
+     *
+     * @param userId 用户ID
+     * @return 包含该用户订单列表的统一响应结果
+     */
     @Operation(summary = "查询用户订单列表")
     @GetMapping("/user/{userId}")
     public Result<List<Orders>> getUserOrders(@PathVariable Long userId){
         return Result.success(orderService.getOrdersByUserId(userId));
     }
 
-    // 新增：分页查询接口
+    /**
+     * 分页查询指定用户的订单列表，支持按订单状态过滤
+     *
+     * @param userId   用户ID
+     * @param pageNum  页码（默认1）
+     * @param pageSize 每页条数（默认10）
+     * @param status   订单状态（可选，如 PENDING、FINISHED）
+     * @return 包含分页订单数据的统一响应结果
+     */
     @Operation(summary = "分页查询用户订单列表")
     @GetMapping("/user/{userId}/page")
     public Result<Page<Orders>> getUserOrdersByPage(
@@ -62,12 +81,25 @@ public class OrderController {
         return Result.success(page);
     }
 
+    /**
+     * 查询订单详情（包含订单信息及所有菜品明细）
+     *
+     * @param id 订单ID
+     * @return 包含订单详情响应对象的统一响应结果
+     */
     @Operation(summary = "查询订单详情")
     @GetMapping("/{id}")
     public Result<OrderResponse> getOrderDetail(@PathVariable Long id){
         return Result.success(orderService.getOrderDetail(id));
     }
 
+    /**
+     * 更新订单状态（仅限管理员）
+     *
+     * @param id     订单ID
+     * @param status 目标订单状态（如 ACCEPTED、COOKING、FINISHED、CANCELLED）
+     * @return 包含更新后订单对象的统一响应结果
+     */
     @Operation(summary = "更新订单状态")
     @PutMapping("/{id}/status")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -77,6 +109,11 @@ public class OrderController {
         return Result.success(orderService.updateOrderStatus(id, status));
     }
 
+    /**
+     * 查询所有订单（不分页，仅限管理员）
+     *
+     * @return 包含所有订单列表的统一响应结果
+     */
     @Operation(summary = "查询所有订单")
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -84,7 +121,15 @@ public class OrderController {
         return Result.success(orderService.getAllOrders());
     }
 
-    // 新增,分页查询所有订单
+    /**
+     * 分页查询所有订单（仅限管理员），支持按用户名模糊搜索和订单状态过滤
+     *
+     * @param username 用户名（模糊匹配，可选）
+     * @param status   订单状态（可选）
+     * @param pageNum  页码（默认1）
+     * @param pageSize 每页条数（默认10）
+     * @return 包含分页订单DTO的统一响应结果（每个订单包含用户名信息）
+     */
     @Operation(summary = "分页查询所有订单")
     @GetMapping("/adminpage")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -105,6 +150,16 @@ public class OrderController {
         return Result.success(dtoPage);
     }
 
+    /**
+     * 导出订单数据至Excel（仅限管理员）
+     * <p>支持按用户名和订单状态过滤，导出符合条件的全部订单（不分页）。</p>
+     * <p>导出成功时直接输出Excel文件流；失败时返回500错误及JSON格式错误信息。</p>
+     *
+     * @param username 用户名（模糊匹配，可选）
+     * @param status   订单状态（可选，字符串形式）
+     * @param response HTTP响应对象，用于写入导出文件或错误信息
+     */
+    @Operation(summary = "导出订单数据")
     @GetMapping("/export")
     @PreAuthorize("hasAuthority('ADMIN')")
     public void exportOrders(@RequestParam(required = false) String username,
@@ -139,7 +194,5 @@ public class OrderController {
                 ioException.printStackTrace();
             }
         }
-
-
     }
 }

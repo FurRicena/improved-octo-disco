@@ -182,10 +182,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { useCartStore } from '@/stores/cart'
-import { useUserStore } from '@/stores/user'   // 需要你已有的用户store，或自己实现一个
-import { getMenuList } from '@/api/menu'        // 获取菜品API
-import {aiRecommend, createOrder} from '@/api/orders'      // 创建订单API
+import { useCartStore } from '@/stores/cart.ts'
+import { useUserStore } from '@/stores/user.ts'   // 需要你已有的用户store，或自己实现一个
+import { getMenuList } from '@/api/menu.ts'        // 获取菜品API
+import {aiRecommend, createOrder} from '@/api/orders.ts'      // 创建订单API
 import type { Menu } from "@/types/Menu.ts"
 
 // 使用stores
