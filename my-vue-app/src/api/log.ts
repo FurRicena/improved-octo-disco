@@ -12,6 +12,13 @@ export interface Log {
     createTime: string    // 操作时间
 }
 
+export interface LogQueryParams {
+    operator?: string     // 可选：按操作人筛选
+    operation?: string    // 可选：按操作类型筛选
+    pageNum: number
+    pageSize: number
+}
+
 // 获取日志列表
 export const getLogs = (params: {
     operator?: string     // 可选：按操作人筛选

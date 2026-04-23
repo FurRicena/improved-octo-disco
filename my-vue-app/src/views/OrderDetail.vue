@@ -36,6 +36,15 @@
             <el-table-column label="小计" width="100" align="center">
               <template #default="{ row }">¥{{ ((row.price || 0) * row.quantity).toFixed(2) }}</template>
             </el-table-column>
+
+            <!-- 新增一列：操作列，根据订单状态显示评价按钮 -->
+            <el-table-column label="操作" width="100" align="center" v-if="order.status === 'FINISHED'">
+              <template #default="{ row }">
+                <el-button type="primary" size="small" @click="goToComment(row.menuId)">
+                  去评价
+                </el-button>
+              </template>
+            </el-table-column>
           </el-table>
         </div>
 
@@ -102,6 +111,16 @@ const cancelOrder = async () => {
   } catch (error) {
     ElMessage.error('取消失败')
   }
+}
+
+// 跳转评论
+const goToComment = (menuId: number) => {
+  router.push({
+    path: `/menu-detail`,
+    query: { id: menuId }
+    // 也可以附带查询参数，如跳转后自动打开评论框
+    // query: { orderId: orderId, autoComment: true }
+  })
 }
 
 const goPay = () => {

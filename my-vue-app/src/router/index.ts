@@ -12,6 +12,7 @@ import OrderDetail from "@/views/OrderDetail.vue"
 import AdminOrders from "@/views/AdminOrders.vue"
 import Layout from "@/views/Layout.vue"
 import {useUserStore} from "@/stores/user.ts";
+import MenuDetail from "@/views/MenuDetail.vue";
 
 const routes = [
     { path: '/login', name: 'Login', component: UserLogin },
@@ -25,6 +26,7 @@ const routes = [
             { path: 'my-orders', name: 'MyOrders', component: MyOrders, meta: { title: '我的订单', requiresAuth: true } },
             { path: 'order-success', name: 'OrderSuccess', component: OrderSuccess, meta: { requiresAuth: true } },
             { path: 'order-detail', name: 'OrderDetail', component: OrderDetail, meta: { requiresAuth: true } },
+            { path: 'menu-detail', name: 'MenuDetail', component: MenuDetail, meta: { requiresAuth: true } },
             // 管理员页面
             { path: 'admin/menu', name: 'AdminMenu', component: AdminMenu, meta: { title: '菜品管理', requiresAuth: true, roles: ['ADMIN'] } },
             { path: 'admin/orders', name: 'AdminOrders', component: AdminOrders, meta: { title: '订单管理', requiresAuth: true, roles: ['ADMIN'] } },
@@ -45,6 +47,12 @@ const routes = [
                 path: '/admin/logs',
                 name: 'AdminLogs',
                 component: () => import('@/views/AdminLogs.vue'),
+                meta: { requiresAuth: true, roles: ['ADMIN'] }
+            },
+            {
+                path: '/admin/comments',
+                name: 'AdminComments',
+                component: () => import('@/views/AdminComments.vue'),
                 meta: { requiresAuth: true, roles: ['ADMIN'] }
             }
         ]

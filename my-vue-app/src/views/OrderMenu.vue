@@ -31,6 +31,9 @@
             class="menu-card"
             shadow="hover"
             body-style="padding: 12px"
+            @click="router.push({
+            path: `/menu-detail`,
+            query: {id: item.id}})"
         >
           <div class="menu-img-wrapper">
             <el-image

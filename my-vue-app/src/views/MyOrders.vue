@@ -106,7 +106,7 @@ const handleStatusChange = () => {
 
 const viewDetail = (orderId: number) => {
   router.push({
-    path: `/orderDetail`,
+    path: `/order-detail`,
     query: {
       orderId: orderId
     }
