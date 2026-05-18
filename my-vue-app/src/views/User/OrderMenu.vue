@@ -115,7 +115,9 @@
         <el-card class="ai-card" :body-style="{ padding: '16px' }">
           <template #header>
             <div class="ai-header">
-              <span>🤖 AI 点餐助手</span>
+<!--              <span>🤖 AI 点餐助手</span>-->
+<!--              &lt;!&ndash; 在头部右侧放置数字人 &ndash;&gt;-->
+              <DigitalHuman ref="digitalHumanRef" @repeat="handleRepeatSpeak" />
             </div>
           </template>
           <div class="ai-recommend-bar">
@@ -224,17 +226,70 @@ const aiQuery = ref('')
 const aiLoading = ref(false)
 const aiRecommendations = ref<Menu[]>([])
 
+import DigitalHuman from '@/components/DigitalHuman.vue'
+import { useTTS } from '@/composables/useTTS'
+
+// 数字人组件 ref
+const digitalHumanRef = ref<InstanceType<typeof DigitalHuman> | null>(null)
+const { speak, stop: stopTTS } = useTTS()
+
+// 修改 getAiRecommend 函数，加入数字人状态控制
 const getAiRecommend = async () => {
   if (!aiQuery.value.trim()) return
+
+  // 1. 数字人切换为聆听状态
+  digitalHumanRef.value?.startListening()
+
   aiLoading.value = true
   try {
+    // 假设后端接口 /ai/recommend 返回的数据结构为：
+    // { data: { recommendations: Menu[], speakText: string } }
     const res = await aiRecommend(aiQuery.value)
-    aiRecommendations.value = res.data
+    const recommendations = res.data.menus
+    const speakText = res.data.speakText   // 推荐语，例如：“亲，根据您的要求，我推荐清炒西兰花和鸡胸肉沙拉哦～”
+
+    // 更新推荐结果
+    aiRecommendations.value = recommendations
+
+    // 2. 如果有推荐语，则开始说话并播放语音
+    if (speakText) {
+      digitalHumanRef.value?.startSpeaking(speakText)
+      await speak(
+          speakText,
+          () => {
+            // 语音开始时的额外操作（可选）
+          },
+          () => {
+            // 语音结束后，数字人恢复空闲
+            digitalHumanRef.value?.stopSpeaking()
+          }
+      )
+    } else {
+      // 没有推荐语，直接恢复空闲
+      digitalHumanRef.value?.stopSpeaking()
+    }
   } catch (error) {
     console.error('AI推荐失败', error)
+    digitalHumanRef.value?.stopSpeaking()
+    ElMessage.error('获取推荐失败，请稍后重试')
   } finally {
     aiLoading.value = false
   }
+}
+
+// 处理重复播放（点击数字人头像时触发）
+const handleRepeatSpeak = async (message: string) => {
+  // 停止当前正在播放的语音
+  stopTTS()
+  // 如果数字人正在说话，先重置状态
+  digitalHumanRef.value?.stopSpeaking()
+  // 开始重新播放
+  digitalHumanRef.value?.startSpeaking(message)
+  await speak(
+      message,
+      undefined,
+      () => digitalHumanRef.value?.stopSpeaking()
+  )
 }
 
 // 直接加入购物车（数量为1）

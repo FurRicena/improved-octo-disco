@@ -1,7 +1,7 @@
 import request from "@/utils/request.ts"
-import type {CreateOrderRequest, Orders} from "@/types/Orders.ts"
-import type { PageResult} from "@/types/PageResult.ts"
-import type {Menu} from "@/types/Menu.ts";
+import type { CreateOrderRequest, Orders } from "@/types/Orders.ts"
+import type { PageResult } from "@/types/PageResult.ts"
+import type { AiRecommendResponse } from "@/types/Menu.ts";
 
 // 查询所有订单
 export function getOrdersList() {
@@ -83,7 +83,7 @@ export function updateOrderStatus(orderId: number, status: string) {
 
 // 1. AI 智能推荐（非流式，返回菜品列表）
 export function aiRecommend(message: string) {
-    return request<Menu[]>({
+    return request<AiRecommendResponse>({
         url: '/ai/recommend',
         method: 'post',
         data: { message }
