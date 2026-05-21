@@ -27,7 +27,7 @@ public class JwtUtils {
         System.out.println("jwtSecret = " + jwtSecret);
     }
 
-    // 生成 Token，里面可以包含用户 id 和角色
+    // 生成 Token，里面包含用户 id 和角色
     public  String generateJwtToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 

@@ -2,8 +2,6 @@ package com.example.demo.Service;
 
 import com.example.demo.DTO.CommentDTO;
 import com.example.demo.Entity.Comment;
-import com.example.demo.Entity.Menu;
-import com.example.demo.Entity.User;
 import com.example.demo.Repository.CommentRepository;
 import com.example.demo.Repository.MenuRepository;
 import com.example.demo.Repository.UserRepository;

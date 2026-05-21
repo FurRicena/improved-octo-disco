@@ -19,7 +19,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import {Vue3Lottie} from 'vue3-lottie'
-// 导入动画 JSON 文件（如果 TypeScript 报错，需要添加声明，见下方说明）
 import idleAnimation from '@/assets/animations/chef-idle.json'
 import listeningAnimation from '@/assets/animations/chef-listening.json'
 import speakingAnimation from '@/assets/animations/chef-speaking.json'

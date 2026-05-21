@@ -56,7 +56,7 @@ public class OrderService {
      * @throws RuntimeException 如果菜品不存在、用户未登录或库存不足（示例未实现库存校验）
      */
     @Schema(description = "创建订单")
-    @Transactional // 非常关键🔥
+    @Transactional
     public Orders createOrder(OrderRequest request) {
 
         BigDecimal total = BigDecimal.ZERO;
@@ -74,8 +74,8 @@ public class OrderService {
         User user = userRepository.findById(request.getUserId()).orElseThrow(() -> new RuntimeException("请登录"));
 
         Orders orders = new Orders();
-//        orders.setUserId(request.getUserId());
         orders.setUser(user);
+        orders.setUserId(user.getId());
         orders.setTotalPrice(total);
         orders.setStatus(OrderStatus.PENDING);
 

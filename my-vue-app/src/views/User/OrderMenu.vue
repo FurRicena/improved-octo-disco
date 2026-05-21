@@ -52,7 +52,7 @@
           <div class="menu-info">
             <h4 class="menu-name">{{ item.name }}</h4>
             <p class="menu-price">¥{{ item.price.toFixed(2) }}</p>
-            <el-button type="primary" size="small" @click="openAddDialog(item)">
+            <el-button type="primary" size="small" @click.stop="openAddDialog(item)">
               加入购物车
             </el-button>
           </div>
@@ -233,7 +233,7 @@ import { useTTS } from '@/composables/useTTS'
 const digitalHumanRef = ref<InstanceType<typeof DigitalHuman> | null>(null)
 const { speak, stop: stopTTS } = useTTS()
 
-// 修改 getAiRecommend 函数，加入数字人状态控制
+
 const getAiRecommend = async () => {
   if (!aiQuery.value.trim()) return
 
@@ -242,11 +242,9 @@ const getAiRecommend = async () => {
 
   aiLoading.value = true
   try {
-    // 假设后端接口 /ai/recommend 返回的数据结构为：
-    // { data: { recommendations: Menu[], speakText: string } }
     const res = await aiRecommend(aiQuery.value)
     const recommendations = res.data.menus
-    const speakText = res.data.speakText   // 推荐语，例如：“亲，根据您的要求，我推荐清炒西兰花和鸡胸肉沙拉哦～”
+    const speakText = res.data.speakText   // 推荐语，例如: "亲，根据您的要求，我推荐清炒西兰花和鸡胸肉沙拉哦～"
 
     // 更新推荐结果
     aiRecommendations.value = recommendations
@@ -257,7 +255,7 @@ const getAiRecommend = async () => {
       await speak(
           speakText,
           () => {
-            // 语音开始时的额外操作（可选）
+            // 开始时操作，暂时为无
           },
           () => {
             // 语音结束后，数字人恢复空闲

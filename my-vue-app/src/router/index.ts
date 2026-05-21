@@ -3,16 +3,16 @@ import { createRouter, createWebHistory } from 'vue-router'
 // 引入页面
 import UserLogin from '@/views/UserLogin.vue'
 import UserRegister from '@/views/UserRegister.vue'
-import AdminMenu from "@/views/AdminMenu.vue"
-import AdminUserManage from "@/views/AdminUserManage.vue"
-import OrderMenu from "@/views/OrderMenu.vue"
-import OrderSuccess from "@/views/OrderSuccess.vue"
-import MyOrders from "@/views/MyOrders.vue"
-import OrderDetail from "@/views/OrderDetail.vue"
-import AdminOrders from "@/views/AdminOrders.vue"
+import AdminMenu from "@/views/Admin/AdminMenu.vue"
+import AdminUserManage from "@/views/Admin/AdminUserManage.vue"
+import OrderMenu from "@/views/User/OrderMenu.vue"
+import OrderSuccess from "@/views/User/OrderSuccess.vue"
+import MyOrders from "@/views/User/MyOrders.vue"
+import OrderDetail from "@/views/User/OrderDetail.vue"
+import AdminOrders from "@/views/Admin/AdminOrders.vue"
 import Layout from "@/views/Layout.vue"
 import {useUserStore} from "@/stores/user.ts";
-import MenuDetail from "@/views/MenuDetail.vue";
+import MenuDetail from "@/views/User/MenuDetail.vue";
 
 const routes = [
     { path: '/login', name: 'Login', component: UserLogin },
@@ -34,25 +34,25 @@ const routes = [
             {
                 path: '/admin/statistics',
                 name: 'AdminStatistics',
-                component: () => import('@/views/AdminStatistics.vue'),
+                component: () => import('@/views/Admin/AdminStatistics.vue'),
                 meta: { requiresAuth: true, roles: ['ADMIN'] }
             },
             {
                 path: '/admin/dashboard',
                 name: 'AdminDashboard',
-                component: () => import('@/views/AdminDashboard.vue'),
+                component: () => import('@/views/Admin/AdminDashboard.vue'),
                 meta: { requiresAuth: true, roles: ['ADMIN'] }
             },
             {
                 path: '/admin/logs',
                 name: 'AdminLogs',
-                component: () => import('@/views/AdminLogs.vue'),
+                component: () => import('@/views/Admin/AdminLogs.vue'),
                 meta: { requiresAuth: true, roles: ['ADMIN'] }
             },
             {
                 path: '/admin/comments',
                 name: 'AdminComments',
-                component: () => import('@/views/AdminComments.vue'),
+                component: () => import('@/views/Admin/AdminComments.vue'),
                 meta: { requiresAuth: true, roles: ['ADMIN'] }
             }
         ]

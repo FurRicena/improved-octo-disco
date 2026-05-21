@@ -73,10 +73,10 @@ public class SecurityConfig {
                                 // 管理员专用接口（只有 ADMIN 角色可访问）
                                 .requestMatchers("/admin/**").hasAuthority("ADMIN")
                                 // 普通用户和管理员都可访问（需要登录）
-//                        .requestMatchers("/user/**").authenticated()
+                                .requestMatchers("/user/**").authenticated()
 
                                 .requestMatchers("/files/**").permitAll()
-                                .anyRequest().authenticated()
+                                .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

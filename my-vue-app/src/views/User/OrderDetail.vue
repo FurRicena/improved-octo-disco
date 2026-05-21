@@ -66,6 +66,7 @@ import {ElMessage, ElMessageBox} from 'element-plus'
 import {getOrderDetail, updateOrderStatus} from '@/api/orders.ts'
 // import { cancelOrder as cancelOrderApi } from '@/api/orders'
 import type { Orders } from '@/types/Orders.ts'
+import { watch } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -74,8 +75,7 @@ const order = ref<Orders | null>(null)
 const orderId = ref()
 
 onMounted(() => {
-  // 从路由参数获取订单信息（下单成功后传递）
-  orderId.value = route.query.orderId as string
+
 })
 
 const fetchDetail = async () => {
@@ -155,9 +155,22 @@ const getStatusText = (status: string) => {
   return map[status] || status
 }
 
-onMounted(() => {
-  fetchDetail()
-})
+// onMounted(() => {
+//   // 从路由参数获取订单信息（下单成功后传递）
+//   orderId.value = route.query.orderId
+//   fetchDetail()
+// })
+
+watch(
+    () => route.query.orderId,
+    (newOrderId) => {
+      if (newOrderId) {
+        orderId.value = newOrderId as string
+        fetchDetail()
+      }
+    },
+    { immediate: true } // 立即执行一次，代替 onMounted 中的调用
+)
 </script>
 
 <style scoped>

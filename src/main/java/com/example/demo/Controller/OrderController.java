@@ -102,7 +102,7 @@ public class OrderController {
      */
     @Operation(summary = "更新订单状态")
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasAuthority('ADMIN')")
+//    @PreAuthorize("hasAuthority('ADMIN')")
     @Log("更新订单状态")
     public Result<Orders> updateStatus(@PathVariable Long id,
                                        @RequestParam OrderStatus status){

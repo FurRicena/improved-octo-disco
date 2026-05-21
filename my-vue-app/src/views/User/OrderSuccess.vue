@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { CircleCheckFilled } from '@element-plus/icons-vue'
@@ -50,13 +50,16 @@ const orderTime = ref('')
 const totalPrice = ref(0)
 const status = ref('PENDING')  // 从后端获取
 
-onMounted(() => {
-  // 从路由参数获取订单信息（下单成功后传递）
-  orderId.value = route.query.orderId as string
-  orderTime.value = route.query.orderTime as string
-  totalPrice.value = Number(route.query.totalPrice)
-  status.value = route.query.status as string || 'PENDING'
-})
+watch(
+    () => route.query,
+    (query) => {
+      orderId.value = query.orderId as string
+      orderTime.value = (query.orderTime as string) || ''
+      totalPrice.value = Number(query.totalPrice) || 0
+      status.value = (query.status as string) || 'PENDING'
+    },
+    { immediate: true, deep: true } // immediate: 立即执行一次（替代 onMounted）
+)
 
 const copyOrderId = () => {
   navigator.clipboard.writeText(orderId.value)
