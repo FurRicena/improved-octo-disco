@@ -3,10 +3,10 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/ai_order
-    username: root
-    password: 123456
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: Your ServerUrl
+    username: Your Username
+    password: Your Password
+    driver-class-name: Your DriverName
   web:
     resources:
       static-locations: file:uploads/
@@ -20,12 +20,12 @@ spring:
     show-sql: true
   ai:
     dashscope:
-      api-key: sk-7136add4cb4845c4b250a169d7d1d7b4
+      api-key: Your ApiKey
 
 jwt:
-  secret: "3Y8i4XpS2a/Z+H9B4E3OaN1g1RkYj/mJz+f9p7k+L8A="
-  expiration: 86400000
+  secret: "Your Secret"
+  expiration: Expiration Time
 
 file:
-  upload-path: D:/SpringCode/demo/uploads/
+  upload-path: File Storage Path
   access-url: http://localhost:8080/files/
