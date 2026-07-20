@@ -1,4 +1,4 @@
-# FurRicena – Restaurant Management System
+# RICENAFU – Restaurant Management System
 
 > A lightweight restaurant management system built with Spring Boot and Vue.
 
