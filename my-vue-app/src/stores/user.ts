@@ -4,7 +4,8 @@ import { ref } from 'vue'
 import { login as loginApi } from '@/api/user'
 import type { LoginForm, User } from '@/types/User'
 
-export const useUserStore = defineStore('user', () => {
+export const useUserStore =
+    defineStore('user', () => {
     const token = ref<string | null>(localStorage.getItem('token'))
     const stored = localStorage.getItem('userInfo')
     const initialUser = stored ? (JSON.parse(stored) as User) : null
@@ -12,7 +13,6 @@ export const useUserStore = defineStore('user', () => {
 
     async function login(loginForm: LoginForm) {
         const res = await loginApi(loginForm)
-        // 假设后端返回 { code:200, data: { token, id, username, role } }
         token.value = res.data.token
         userInfo.value = res.data
         localStorage.setItem('token', res.data.token)

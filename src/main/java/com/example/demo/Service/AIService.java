@@ -75,16 +75,13 @@ public class AIService {
      * @return AiRecommendResponse
      */
     public AiRecommendResponse getRecommendWithText(String userMessage) {
-        // 1. 获取所有菜品的简要信息（用于 AI 参考）
+        // 1. 获取所有菜品的简要信息
         String menuContext = getAllMenusJson();
-
         // 2. 构建 Prompt，要求 AI 返回推荐菜品 ID 列表 + 推荐语
         String prompt = String.format("""
             你是一个餐厅的智能点餐助手。用户说：“%s”。
-            
             以下是餐厅的全部菜品（id, 名称, 类别, 价格）：
             %s
-            
             请根据用户的需求，推荐2-3个最合适的菜品，并生成一句亲切的推荐语（20字以内）。
             返回格式必须是严格的JSON，不要有其他任何文字：
             {
@@ -92,13 +89,10 @@ public class AIService {
                 "speakText": "推荐语"
             }
             """, userMessage, menuContext);
-
         String response = chatClient.prompt().user(prompt).call().content();
-
         // 3. 解析 AI 返回的 JSON
         List<Long> recommendIds = new ArrayList<>();
         String speakText = "感谢您的点餐，祝您用餐愉快！";  // 默认推荐语
-
         try {
             JsonNode node = objectMapper.readTree(response);
             if (node.has("recommendIds")) {
@@ -111,14 +105,12 @@ public class AIService {
             // 解析失败，降级使用原有意图解析逻辑
             return fallbackRecommendation(userMessage);
         }
-
         // 4. 根据 ID 查询完整菜品
         List<Menu> menus = menuRepository.findAllById(recommendIds);
         if (menus.isEmpty()) {
             // 如果查询结果为空（例如 ID 无效），降级
             return fallbackRecommendation(userMessage);
         }
-
         // 5. 组装返回对象
         AiRecommendResponse result = new AiRecommendResponse();
         result.setMenus(menus);

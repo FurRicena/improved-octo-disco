@@ -46,7 +46,7 @@ public class User {
 
     @Schema(description = "用户角色")
     @Enumerated(EnumType.STRING)
-    private UserRole role = UserRole.USER; // 'USER' 或 'ADMIN'
+    private UserRole role = UserRole.USER;
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime = LocalDateTime.now();

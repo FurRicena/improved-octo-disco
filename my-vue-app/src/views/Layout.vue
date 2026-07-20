@@ -18,7 +18,9 @@
           <!-- 有子菜单 -->
           <el-sub-menu v-if="item.children && item.children.length" :index="item.path">
             <template #title>
-              <el-icon><component :is="item.icon" /></el-icon>
+              <el-icon>
+                <component :is="item.icon"/>
+              </el-icon>
               <span>{{ item.name }}</span>
             </template>
             <el-menu-item v-for="child in item.children" :key="child.path" :index="child.path">
@@ -27,7 +29,9 @@
           </el-sub-menu>
           <!-- 无子菜单 -->
           <el-menu-item v-else :index="item.path">
-            <el-icon><component :is="item.icon" /></el-icon>
+            <el-icon>
+              <component :is="item.icon"/>
+            </el-icon>
             <span>{{ item.name }}</span>
           </el-menu-item>
         </template>
@@ -37,13 +41,15 @@
     <el-container>
       <el-header class="header">
         <div class="header-left">
-          <el-icon :size="20" @click="toggleCollapse"><Fold /></el-icon>
+          <el-icon :size="20" @click="toggleCollapse">
+            <Fold/>
+          </el-icon>
         </div>
         <div class="header-right">
           <el-dropdown @command="handleCommand">
             <span class="user-info">
               {{ userStore.userInfo?.username || '用户' }}
-              <el-icon><CaretBottom /></el-icon>
+              <el-icon><CaretBottom/></el-icon>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
@@ -56,7 +62,7 @@
       <el-main class="main">
         <router-view v-slot="{ Component }">
           <keep-alive>
-            <component :is="Component" />
+            <component :is="Component"/>
           </keep-alive>
         </router-view>
       </el-main>
@@ -65,10 +71,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useUserStore } from '@/stores/user'
-import { Fold, CaretBottom } from '@element-plus/icons-vue'
+import {ref, computed} from 'vue'
+import {useRouter, useRoute} from 'vue-router'
+import {useUserStore} from '@/stores/user'
+import {Fold, CaretBottom} from '@element-plus/icons-vue'
 
 interface MenuItem {
   path: string
@@ -88,8 +94,8 @@ const isCollapse = ref(false)
 const menuList = computed<MenuItem[]>(() => {
   const isAdmin = userStore.userInfo?.role === 'ADMIN'
   const commonMenus: MenuItem[] = [
-    { path: '/order', name: '点菜', icon: 'Shop', meta: { roles: ['USER', 'ADMIN'] } },
-    { path: '/my-orders', name: '我的订单', icon: 'List', meta: { roles: ['USER', 'ADMIN'] } },
+    {path: '/order', name: '点菜', icon: 'Shop', meta: {roles: ['USER', 'ADMIN']}},
+    {path: '/my-orders', name: '我的订单', icon: 'List', meta: {roles: ['USER', 'ADMIN']}},
   ]
   if (isAdmin) {
     const adminMenus: MenuItem[] = [
@@ -98,13 +104,13 @@ const menuList = computed<MenuItem[]>(() => {
         name: '系统管理',
         icon: 'Setting',
         children: [
-          { path: '/admin/menu', name: '菜品管理', icon: 'Dish', meta: { roles: ['ADMIN'] } },
-          { path: '/admin/orders', name: '订单管理', icon: 'Tickets', meta: { roles: ['ADMIN'] } },
-          { path: '/admin/users', name: '用户管理', icon: 'User', meta: { roles: ['ADMIN'] } },
-          { path: '/admin/statistics', name: '销量统计', icon: 'DataLine', meta: { roles: ['ADMIN'] } },
-          { path: '/admin/dashboard', name: '数据仪表盘', icon: 'DataLine', meta: { roles: ['ADMIN'] } },
-          { path: '/admin/logs', name: '日志管理', icon: 'Document', meta: { roles: ['ADMIN'] } },
-          { path: '/admin/comments', name: '评论管理', icon: 'Document', meta: { roles: ['ADMIN'] } }
+          {path: '/admin/menu', name: '菜品管理', icon: 'Dish', meta: {roles: ['ADMIN']}},
+          {path: '/admin/orders', name: '订单管理', icon: 'Tickets', meta: {roles: ['ADMIN']}},
+          {path: '/admin/users', name: '用户管理', icon: 'User', meta: {roles: ['ADMIN']}},
+          {path: '/admin/statistics', name: '销量统计', icon: 'DataLine', meta: {roles: ['ADMIN']}},
+          {path: '/admin/dashboard', name: '数据仪表盘', icon: 'DataLine', meta: {roles: ['ADMIN']}},
+          {path: '/admin/logs', name: '日志管理', icon: 'Document', meta: {roles: ['ADMIN']}},
+          {path: '/admin/comments', name: '评论管理', icon: 'Document', meta: {roles: ['ADMIN']}}
         ]
       }
     ]
@@ -133,11 +139,13 @@ const handleCommand = (cmd: string) => {
 .layout-container {
   height: 100vh;
 }
+
 .aside {
   background-color: #304156;
   transition: width 0.3s;
   overflow-x: hidden;
 }
+
 .logo {
   height: 60px;
   line-height: 60px;
@@ -147,9 +155,11 @@ const handleCommand = (cmd: string) => {
   font-weight: bold;
   background-color: #263445;
 }
+
 .logo.collapse {
   font-size: 18px;
 }
+
 .header {
   background-color: white;
   border-bottom: 1px solid #e6e6e6;
@@ -158,15 +168,18 @@ const handleCommand = (cmd: string) => {
   justify-content: space-between;
   padding: 0 20px;
 }
+
 .header-left {
   cursor: pointer;
 }
+
 .user-info {
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 4px;
 }
+
 .main {
   background-color: #f5f7fa;
   padding: 20px;

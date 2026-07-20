@@ -36,26 +36,21 @@ const currentAnimation = computed(() => {
     default:          return idleAnimation
   }
 })
-
-// 暴露方法供父组件调用
 const startListening = () => {
   state.value = 'listening'
   currentMessage.value = ''
 }
-
 const startSpeaking = (message: string) => {
   lastMessage.value = message
   currentMessage.value = message
   state.value = 'speaking'
 }
-
 const stopSpeaking = () => {
   if (state.value === 'speaking') {
     state.value = 'idle'
     currentMessage.value = ''
   }
 }
-
 const emit = defineEmits<{
   (e: 'repeat', message: string): void
 }>()

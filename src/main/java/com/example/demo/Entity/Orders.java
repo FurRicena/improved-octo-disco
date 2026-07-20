@@ -17,7 +17,7 @@ public class Orders {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")   // 假设数据库列名为 user_id
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Schema(description = "用户id")
@@ -29,7 +29,7 @@ public class Orders {
 
     @Schema(description = "订单状态")
     @Enumerated(EnumType.STRING)
-    private OrderStatus status = OrderStatus.PENDING; // PENDING...
+    private OrderStatus status = OrderStatus.PENDING;
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime = LocalDateTime.now();
