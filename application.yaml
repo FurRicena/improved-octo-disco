@@ -1,0 +1,31 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: Your ServerUrl
+    username: Your Username
+    password: Your Password
+    driver-class-name: Your DriverName
+  web:
+    resources:
+      static-locations: file:uploads/
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  ai:
+    dashscope:
+      api-key: Your ApiKey
+
+jwt:
+  secret: "Your Secret"
+  expiration: Expiration Time
+
+file:
+  upload-path: File Storage Path
+  access-url: http://localhost:8080/files/
